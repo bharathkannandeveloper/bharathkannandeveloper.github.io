@@ -29,10 +29,7 @@
     text-align: Left; /* Center text within each box */
 }
 
-
-
 </style>
-
 
 <body>
     <header>
@@ -231,12 +228,10 @@
                 `;
                 securityContainer.appendChild(threatDiv);
                 updateRiskCount(); // Update the count display
-                document.getElementById('beepSound').play();
+
             }
         }
-
-        
-    
+  
         function detectThreats() {
             // Example unique threats
             const threats = [
@@ -254,7 +249,7 @@
         }
     
         // Simulate threat detection every 5 seconds
-        setInterval(detectThreats, 5000); // Adjust the interval as needed
+        setInterval(detectThreats, 3000); // Adjust the interval as needed
     </script>
       
       <audio id="beepSound" src="./sounds/beep.mp3" preload="auto"></audio>

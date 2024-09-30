@@ -38,18 +38,23 @@ function startProgress() {
         bardet.classList.add("detectedClr");
         triggAccord();
         modalOpen.classList.add("show");
+        document.getElementById('beepSound').play();
       } else if (petceValue == 40) {
         detectcount = 2;
         modalOpen.classList.add("show");
+        document.getElementById('beepSound').play();
       } else if (petceValue == 60) {
         detectcount = 3;
         modalOpen.classList.add("show");
+        document.getElementById('beepSound').play();
       } else if (petceValue == 80) {
         detectcount = 4;
         modalOpen.classList.add("show");
+        document.getElementById('beepSound').play();
       } else if (petceValue == 100) {
         detectcount = 5;
         modalOpen.classList.add("show");
+        document.getElementById('beepSound').play();
         triggAccord();
       }
       if (detectcount !== 0) {
@@ -70,7 +75,7 @@ function startProgress() {
       }
       clearInterval(interval);
     }
-  }, 70);
+  }, 40);
 }
 const triggAccord = (petceValue, detectcount) => {
   if (petceValue === 100 || detectcount === 5) {
