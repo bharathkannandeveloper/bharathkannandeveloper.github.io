@@ -42,7 +42,7 @@ function startProgress() {
       } else if (petceValue == 40) {
         detectcount = 2;
         modalOpen.classList.add("show");
-        document.getElementById('beepSound').play();
+        document.getElementById('beepSound1').play();
       } else if (petceValue == 60) {
         detectcount = 3;
         modalOpen.classList.add("show");
@@ -50,7 +50,7 @@ function startProgress() {
       } else if (petceValue == 80) {
         detectcount = 4;
         modalOpen.classList.add("show");
-        document.getElementById('beepSound').play();
+        document.getElementById('beepSound1').play();
       } else if (petceValue == 100) {
         detectcount = 5;
         modalOpen.classList.add("show");
@@ -75,7 +75,7 @@ function startProgress() {
       }
       clearInterval(interval);
     }
-  }, 40);
+  }, 20);
 }
 const triggAccord = (petceValue, detectcount) => {
   if (petceValue === 100 || detectcount === 5) {
