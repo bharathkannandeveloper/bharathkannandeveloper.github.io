@@ -1,261 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <title>McAfee</title>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/x-icon" href="https://images.sftcdn.net/images/t_app-icon-s/p/8920b28c-96d4-11e6-b033-00163ec9f5fa/402824032/mcafee-total-protection-imgingest-5418346907674484388.png">
-    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urgent Blood Requirement: B-ve</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        .blood-group-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 900;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .card-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
 </head>
-<style>
-    @import url('https://sfonts.googleapis.com/css2?familswapy=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
-    .securityCont {
-    display: flex;
-    flex-wrap: wrap; /* Allow items to wrap if needed */
-    justify-content: left; /* Center items horizontally */
-    gap: 0px; /* Space between boxes */
-}
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-.securityCont > div {
-/* Space around each threat */
-    width: 200px; /* Set a fixed width */
-    height: 80px; /* Set a fixed height */
-    display: flex;
-    flex-direction: column; /* Stack contents vertically */
-    align-items: center; /* Center contents horizontally */
-    justify-content: center; /* Center contents vertically */
-    box-sizing: border-box; /* Include padding and border in the element's total size */
-    text-align: Left; /* Center text within each box */
-}
-
-</style>
-
-<body>
-    <header>
-        <div class="logo-sec">
-            <div class="logo"> <img src="./img/MCFE-d6ec69dd.png" alt="logo" /></div>
-            <h2 class="logotxt">McAfee<sup>®</sup> Total
-                Protection</h2>
+    <div class="w-full max-w-sm bg-white rounded-2xl card-shadow overflow-hidden" id="poster">
+        <!-- Header Section -->
+        <div class="bg-red-600 text-white text-center p-4">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-wider">URGENT BLOOD REQUIRED</h1>
         </div>
-        <div class="navMenu">
-            <div class="menus leftnav w-50s">
-                <ul>
-                    <li>Home</li>
-                    <li class="active">McAfee Security</li>
-                    <li>Identity</li>
-                    <li>Account</li>
-                </ul>
+
+        <!-- Blood Group Section -->
+        <div class="relative text-center p-8 bg-white">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                 <svg class="w-48 h-48 text-red-100" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path></svg>
             </div>
-            <div class="righttop">
-                <ul class="top-menu">
-                    <li><span><img src="./img/bell.png" /></span></li>
-                    <li><span><img src="./img/smartlight.png" /></span></li>
-                    <li><span><img src="./img/settings.png" /></span></li>
-                </ul>
-            </div>
+            <p class="text-gray-600 text-lg font-semibold">Blood Group</p>
+            <p class="text-8xl md:text-9xl text-red-600 blood-group-text relative">B-ve</p>
+            <p class="text-red-500 font-semibold mt-2">(B Negative)</p>
         </div>
-    </header>
-    <main>
-        <div class="contentWrapper">
-            <div class="sidewrapper">
-                <div class="scan-sec">
-                    <h4>Scanning</h4>
-                    <div class="loadicon">
-                        <div class="lds-roller">
-                            <div></div>
-                            <div></div>
-                            <div></div>
-                            <div></div>
-                            <div></div>
-                            <div></div>
-                        </div>
-                    </div>
-                    <p>Scanning commonly infected areas and startup files...</p>
+
+        <!-- Patient Details Section -->
+        <div class="px-6 py-4 bg-gray-50 border-t border-b border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-3 text-center">Patient Details</h2>
+            <div class="text-lg space-y-2 text-gray-700">
+                <div class="flex justify-between">
+                    <span class="font-semibold">Name:</span>
+                    <span>Ajith Kumar</span>
                 </div>
-            </div>
-            <div class="mainconwrap">
-                <div class="content-scan">
-                    <div class="w-100 acc-body">
-                        <div class="head-sec">Results Summary</div>
-
-                    </div>
-                    <div class="w-100 acc-body">
-                        <div class="cssProgress">
-                            <div class="progress-bar-container head-sec">
-                                <div class="cssProgress-bar" data-total="400" style="width: 0%;">
-                                    <div class="proger-val">
-                                        <div class="proTxt">Total items scanned:</div>
-                                        <span class="cssProgress-label"> 0</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- <div class="head-sec">Total items scanned: 25888</div> -->
-                    </div>
-                    <div class="w-100 acc-body">
-                        <div class="head-sec"> Total security risks detected: <span class="deteCount">0</span></div>
-
-                        <div class="accISopen">
-                            <div class="securityCont">
-
-                            </div>
-                        </div>
-                    </div>
-                    <div class="w-100 acc-body">
-                        <div class="head-sec">[+] Total security risks resolved : 0</div>
-                    </div>
-                    <div class="w-100 acc-body">
-                        <div class="head-sec">Total security risks requiring attention : 0</div>
-                    </div>
+                <div class="flex justify-between">
+                    <span class="font-semibold">Age:</span>
+                    <span>27</span>
+                </div>
+                 <div class="flex justify-between">
+                    <span class="font-semibold">Reason:</span>
+                    <span>Plastic Surgery</span>
+                </div>
+                <div class="flex justify-between items-start">
+                    <span class="font-semibold">Hospital:</span>
+                    <span class="text-right">Chengalpattu<br>Government Hospital</span>
                 </div>
             </div>
         </div>
-    </main>
-    <div class="modalPopup" id="virusescdet">
-        <div class="modalDialog detect-dialog">
-            <div class="modalContent">
-                <div class="modalHeader">
-                    <h1>Threat Detected</h1>
-                    <p>Trojan IRC/Backdoor.sd.FRV</p>
-                </div>
-                <div class="modalBody">
-                    <div class="instrContent">
-                        <ul class="detMenu">
-                            <li>
-                                <div class="lmenu">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </div>
-                                <div>high Risk</div>
-                            </li>
-                            <li>
-                                <icon> <svg stroke="currentColor" fill="currentColor" stroke-width="0"
-                                        viewBox="0 0 576 512" height="200px" width="200px"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path
-                                            d="M280.37 148.26L96 300.11V464a16 16 0 0 0 16 16l112.06-.29a16 16 0 0 0 15.92-16V368a16 16 0 0 1 16-16h64a16 16 0 0 1 16 16v95.64a16 16 0 0 0 16 16.05L464 480a16 16 0 0 0 16-16V300L295.67 148.26a12.19 12.19 0 0 0-15.3 0zM571.6 251.47L488 182.56V44.05a12 12 0 0 0-12-12h-56a12 12 0 0 0-12 12v72.61L318.47 43a48 48 0 0 0-61 0L4.34 251.47a12 12 0 0 0-1.6 16.9l25.5 31A12 12 0 0 0 45.15 301l235.22-193.74a12.19 12.19 0 0 1 15.3 0L530.9 301a12 12 0 0 0 16.9-1.6l25.5-31a12 12 0 0 0-1.7-16.93z">
-                                        </path>
-                                    </svg></icon>
 
-                                <div>
-                                    <h4>Origin</h4>
-                                    <p>Not available</p>
-                                </div>
-                            </li>
-                            <li>
-                                <icon> <svg stroke="currentColor" fill="currentColor" stroke-width="0"
-                                        viewBox="0 0 24 24" height="200px" width="200px"
-                                        xmlns="http://www.w3.org/2000/svg">
-                                        <path d="m14.303 6-3-2H6V2H4v20h2v-8h4.697l3 2H20V6z"></path>
-                                    </svg></icon>
-                                <div>
-                                    <h4>Activity</h4>
-                                    <p>Threat actions performed: 1</p>
-                                </div>
-                            </li>
-                        </ul>
+        <!-- Contact & Location Section -->
+        <div class="p-6 text-center">
+            <div class="flex flex-col md:flex-row items-center justify-center gap-4">
+                <!-- Contact Info -->
+                <div class="flex-1 text-center">
+                    <p class="text-lg text-gray-600 mb-2">Contact Donor Helpline:</p>
+                    <div class="bg-green-500 text-white text-xl font-bold py-3 px-4 rounded-lg inline-block">
+                        <a href="tel:+918973458522">+91 8973458522</a>
                     </div>
                 </div>
-
+                <!-- QR Code -->
+                <div class="flex-1 text-center">
+                     <p class="text-lg text-gray-600 mb-2">Scan for Location:</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://www.google.com/maps/search/?api=1%26query=Chengalpattu+Government+Hospital" alt="QR Code for Hospital Location" class="mx-auto rounded-lg border-4 border-white shadow-lg">
+                </div>
             </div>
+             <p class="text-md font-semibold text-red-600 mt-6">Your help can save a life. Please share!</p>
         </div>
     </div>
-    <div class="modalPopup " id="finalProceemodal">
 
-        <div class="modalDialog centerDialog">
-            <div class="modalContent">
-                <div class="modalHeader">
-                    <header>
-                        <div class="logo-sec">
-                            <div class="logo"> <img src="./img/MCFE-d6ec69dd.png" alt="logo" /></div>
-                            <h2 class="logotxt">McAfee<sup>®</sup> Total
-                                Protection</h2>
-                        </div>
-                    </header>
-                </div>
-                <div class="flat-sec">
-                    <h1> Your device is infected with 5 virues!</h1>
-                </div>
-                <div class="modalBody">
-                    <div class="content-detat">
-                        <div>
-                            <h4>Immediate Action Required!</h4>
-                        </div>
-                        <div>
-                            <h5>Your McAfee subscription has expired!</h5>
-                        </div>
-                        <div>
-                            <h5>Renew now to keep your device protected.</h5>
-                        </div>
-                        <div>
-                            <p>Virues found on this device most likely track internet activity to collect banking
-                                details
-                                and login credential. Unprotected devices are 93% more vulnerable to suffer from malware
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <a href="http://www.google.com/" style="text-decoration: none;">
-                <div class="btsecfooter"><button class="proceBtn">Proceed...</button></div>
-                </a>
-            </div>
-        </div>
-    </div>
-    <script src="./js/script.js"></script>
-    <script>
-        let totalRisksDetected = 0;
-        const detectedThreats = new Set(); // To track unique threats
-    
-        function updateRiskCount() {
-            document.querySelector('.deteCount').textContent = totalRisksDetected;
-        }
-    
-        function addThreat(threatName, riskLevel) {
-            // Check if the threat is already detected
-            if (!detectedThreats.has(threatName)) {
-                detectedThreats.add(threatName); // Add to the set for uniqueness
-                totalRisksDetected++; // Increment only for unique threats
-                
-                const securityContainer = document.querySelector('.securityCont');
-                const threatDiv = document.createElement('div');
-                threatDiv.innerHTML = `
-                    <h4>${totalRisksDetected}. Virus</h4>
-                    <p>${threatName}</p>
-                    <p>Risk level: ${riskLevel}</p>
-                `;
-                securityContainer.appendChild(threatDiv);
-                updateRiskCount(); // Update the count display
-
-            }
-        }
-  
-        function detectThreats() {
-            // Example unique threats
-            const threats = [
-            { name: "win32/Hoax.Renos.HX", level: "HIGH" },
-            { name: "Trojan IRC/Backdoor.sd", level: "HIGH" },
-            { name: "Adware/AdWizard", level: "MEDIUM" },
-            { name: "Spyware/SpyEye", level: "HIGH" },
-            { name: "Trojan/DDoS", level: "HIGH" },
-                // Add more threats as necessary
-            ];
-    
-            // Randomly select a threat to simulate detection
-            const randomThreat = threats[Math.floor(Math.random() * threats.length)];
-            addThreat(randomThreat.name, randomThreat.level);
-        }
-    
-        // Simulate threat detection every 5 seconds
-        setInterval(detectThreats, 3000); // Adjust the interval as needed
-    </script>
-      
-      <audio id="beepSound" src="./sounds/beep.mp3" preload="auto"></audio>
-      <audio id="beepSound1" src="./sounds/beep copy.mp3" preload="auto"></audio>
-
-    
 </body>
-
 </html>
