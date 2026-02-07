@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Job Radar v19 - Precision</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        /* Modern Midnight Palette */
+        :root {
+            --bg-deep: #050505;
+            --bg-panel: rgba(20, 20, 25, 0.95);
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            overflow: hidden;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 2px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        select {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: #e2e8f0;
+        }
+
+        select option {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 8px;
+        }
+
+        /* Animations */
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 10px var(--accent-glow);
+                border-color: rgba(99, 102, 241, 0.5);
+            }
+
+            50% {
+                box-shadow: 0 0 20px var(--accent-glow);
+                border-color: rgba(99, 102, 241, 0.8);
+            }
+        }
+
+        .animate-scan {
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .job-card {
+            animation: slideIn 0.3s ease-out forwards;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            background: rgba(30, 41, 59, 1);
+            border-left-color: var(--accent);
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .badge-exact {
+            background: rgba(56, 189, 248, 0.15);
+            color: #7dd3fc;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+
+        .badge-generic {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+
+        .badge-spam {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-india {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mobile-hide {
+                display: none;
+            }
+
+            .sidebar {
+                position: absolute;
+                height: 100%;
+                width: 85%;
+                max-width: 320px;
+                z-index: 50;
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .overlay {
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                display: none;
+            }
+
+            .overlay.open {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body class="h-screen flex flex-col selection:bg-indigo-500 selection:text-white pb-6">
+
+    <!-- HEADER -->
+    <header
+        class="glass h-16 flex items-center justify-between px-4 lg:px-6 z-30 shrink-0 border-b border-indigo-500/10">
+        <div class="flex items-center gap-3">
+            <button onclick="app.toggleSidebar()" class="md:hidden text-slate-400 hover:text-white">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="relative group cursor-pointer">
+                <i class="fa-solid fa-radar text-indigo-500 text-xl md:text-2xl group-hover:animate-spin"></i>
+                <div class="absolute -top-1 -right-2 w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+            </div>
+            <div>
+                <h1 class="text-base md:text-lg font-bold tracking-tight text-white leading-none">
+                    JOB RADAR
+                </h1>
+                <div class="flex items-center gap-2">
+                    <span class="text-[9px] md:text-[10px] text-indigo-400 font-mono tracking-widest uppercase">Precise
+                        v19.0</span>
+                    <span
+                        class="text-[9px] text-slate-500 uppercase tracking-widest border-l border-slate-700 pl-2">Powered
+                        by RB</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="hidden md:flex items-center gap-6 text-xs font-mono text-slate-500">
+            <div class="flex items-center gap-2">
+                <div id="status-indicator" class="w-2 h-2 rounded-full bg-slate-600"></div>
+                <span id="status-text" class="text-slate-400">Idle</span>
+            </div>
+            <div class="bg-indigo-900/20 px-3 py-1 rounded border border-indigo-500/20 text-indigo-300">
+                Jobs Found: <b id="stat-total" class="text-white">0</b>
+            </div>
+        </div>
+
+        <div class="flex gap-2">
+            <button onclick="app.scan()" id="btn-scan"
+                class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded text-xs md:text-sm font-bold shadow-lg shadow-indigo-500/20 transition flex items-center gap-2 active:scale-95">
+                <i class="fa-solid fa-bolt"></i> <span class="hidden sm:inline">START SCAN</span>
+            </button>
+            <button onclick="app.export('xlsx')"
+                class="w-8 h-8 md:w-auto md:px-3 rounded bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 md:text-xs flex items-center justify-center transition">
+                <i class="fa-solid fa-download"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENT -->
+    <div class="flex-1 flex overflow-hidden relative">
+        <div id="mobile-overlay" class="overlay" onclick="app.toggleSidebar()"></div>
+
+        <!-- SIDEBAR -->
+        <aside id="sidebar"
+            class="sidebar md:relative md:transform-none w-80 glass flex flex-col border-r border-indigo-500/10 bg-[#0a0a0c] md:bg-transparent">
+            <div class="md:hidden p-4 border-b border-slate-800 flex justify-between items-center">
+                <span class="font-bold text-slate-300">Configuration</span>
+                <button onclick="app.toggleSidebar()" class="text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-4 border-b border-white/5 space-y-4">
+                <div>
+                    <label
+                        class="text-[10px] text-indigo-400 uppercase font-bold tracking-wider mb-1 block">Keywords</label>
+                    <textarea id="keywords"
+                        class="w-full bg-black/40 border border-slate-700 rounded p-3 text-xs text-slate-200 h-20 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition placeholder-slate-600 font-mono"
+                        placeholder="e.g. React, Python, Java">react, python, data scientist, software engineer, backend, frontend</textarea>
+                </div>
+
+                <div class="space-y-2">
+                    <div
+                        class="flex items-center gap-3 bg-indigo-900/10 p-2 rounded border border-indigo-500/10 hover:bg-indigo-900/20 transition">
+                        <input type="checkbox" id="global-mode"
+                            class="w-3.5 h-3.5 text-indigo-600 bg-slate-900 border-slate-600 rounded focus:ring-indigo-500 focus:ring-1 cursor-pointer">
+                        <label for="global-mode"
+                            class="text-[10px] text-slate-300 cursor-pointer select-none font-medium flex-1">Global Mode
+                            (Non-India)</label>
+                        <i class="fa-solid fa-globe text-indigo-500 text-xs"></i>
+                    </div>
+
+                    <div class="flex items-center gap-3 bg-slate-900/40 p-2 rounded border border-slate-800">
+                        <input type="checkbox" id="strict-mode" checked
+                            class="w-3.5 h-3.5 text-sky-600 bg-slate-900 border-slate-600 rounded focus:ring-sky-500 focus:ring-1 cursor-pointer">
+                        <label for="strict-mode" class="text-[10px] text-slate-400 cursor-pointer select-none">Strict
+                            Match (No Spam)</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-b border-white/5 flex-1 overflow-y-auto custom-scrollbar">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filters & Sort</h2>
+                    <button onclick="app.resetFilters()"
+                        class="text-[10px] text-indigo-400 hover:text-indigo-300 transition">Reset All</button>
+                </div>
+
+                <div class="space-y-3">
+                    <input type="text" id="search" oninput="app.filter()" placeholder="Quick filter..."
+                        class="w-full bg-black/20 border border-slate-700 rounded p-2 text-xs text-white placeholder-slate-600 focus:border-indigo-500 transition">
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Sort Order</label>
+                        <select id="sort-by" onchange="app.filter()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[11px] text-slate-300 focus:border-indigo-500 outline-none">
+                            <option value="relevance">✨ Relevance (Smart)</option>
+                            <option value="date_desc">📅 Date (Newest First)</option>
+                            <option value="date_asc">📅 Date (Oldest First)</option>
+                            <option value="role_asc">🔤 Role (A-Z)</option>
+                            <option value="role_desc">🔤 Role (Z-A)</option>
+                            <option value="company_asc">🏢 Company (A-Z)</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Source Type</label>
+                        <select id="filter-type" onchange="app.filter()"
+                            class="w-full bg-slate-900 border-l-4 border-l-sky-500 border-slate-700 rounded p-1.5 text-[11px] text-slate-300 font-bold">
+                            <option value="all">🌍 All Sources</option>
+                            <option value="Career">🏢 Career Pages Only (Direct)</option>
+                            <option value="Portal">🔍 Job Portals Only</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label class="text-[9px] text-slate-500 uppercase">Filters</label>
+                        <select id="filter-company" onchange="app.filter()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[11px] text-slate-300 mb-1">
+                            <option value="all">🏢 All Companies</option>
+                        </select>
+                        <select id="filter-loc" onchange="app.filter()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[11px] text-slate-300 mb-1">
+                            <option value="all">📍 All Cities</option>
+                        </select>
+                        <select id="filter-date" onchange="app.filter()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded p-1.5 text-[11px] text-slate-300">
+                            <option value="all">📅 Any Date</option>
+                            <option value="1">Last 24 Hours</option>
+                            <option value="3">Last 3 Days</option>
+                            <option value="7">Last Week</option>
+                            <option value="30">Last Month</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-32 flex flex-col min-h-0 bg-black border-t border-slate-800 font-mono">
+                <div class="px-3 py-1.5 bg-slate-900/50 border-b border-slate-800 flex justify-between items-center">
+                    <span
+                        class="text-[9px] font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fa-solid fa-microchip"></i> System Logs
+                    </span>
+                    <button onclick="document.getElementById('logs').innerHTML=''"
+                        class="text-[10px] text-slate-600 hover:text-white transition"><i
+                            class="fa-solid fa-eraser"></i></button>
+                </div>
+                <div id="logs" class="flex-1 overflow-y-auto p-3 text-[10px] space-y-1.5 scroll-smooth text-slate-400">
+                    <div class="log-info text-indigo-300">> Job Radar v19 System Initialized.</div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RESULTS AREA -->
+        <main class="flex-1 bg-[#050505] relative flex flex-col w-full pb-8">
+            <div class="h-0.5 w-full bg-slate-800/50 absolute top-0 left-0 z-20">
+                <div id="progress"
+                    class="h-full bg-indigo-500 w-0 transition-all duration-300 shadow-[0_0_15px_rgba(99,102,241,0.8)]">
+                </div>
+            </div>
+
+            <div id="job-list" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-3 custom-scrollbar">
+                <div class="h-full flex flex-col items-center justify-center text-slate-700 select-none">
+                    <div
+                        class="w-24 h-24 rounded-full bg-slate-800/20 flex items-center justify-center mb-6 border border-slate-800 animate-pulse">
+                        <i class="fa-solid fa-globe text-5xl text-slate-800"></i>
+                    </div>
+                    <p class="text-sm font-medium text-slate-500 uppercase tracking-widest">Global Scan Ready</p>
+                    <p class="text-xs mt-2 text-slate-600">Enter keywords and click Start</p>
+                </div>
+            </div>
+
+            <div id="load-more-container"
+                class="hidden p-4 text-center border-t border-white/5 bg-slate-900/80 backdrop-blur-md z-10 w-full mb-safe">
+                <button onclick="app.loadMore()"
+                    class="px-8 py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-300 rounded text-xs font-bold transition uppercase tracking-wider transform active:scale-95 shadow-lg">
+                    Load More Results
+                </button>
+            </div>
+        </main>
+
+        <footer
+            class="fixed bottom-0 w-full bg-slate-900/90 backdrop-blur border-t border-slate-800 text-center py-1.5 z-40">
+            <p class="text-[10px] md:text-xs text-slate-500 font-medium tracking-wide">
+                Made for Job Hunters with <span class="text-red-500 animate-pulse">❤️</span> by <b
+                    class="text-slate-300">rbkannan</b>
+            </p>
+        </footer>
+    </div>
+
+    <!-- JS LOGIC -->
+    <script>
+        // STRICT WHITELIST V19: Only titles that are almost guaranteed to be relevant tech jobs
+        // Even if the keyword 'React' isn't in title, 'Software Engineer' is allowed.
+        // 'Java Developer' (contains 'developer') is NOT allowed unless explicitly whitelisted or matches generic.
+        // We use full generic phrases to avoid matching "Sales Engineer" or "BizDev".
+        const GENERIC_ROLES = [
+            'software engineer', 'software developer', 'application developer', 'applications developer',
+            'systems engineer', 'system engineer', 'backend', 'frontend', 'front end', 'back end', 'full stack', 'fullstack',
+            'sde', 'mts', 'member of technical staff', 'data scientist', 'data engineer', 'devops', 'site reliability', 'sre',
+            'cloud engineer', 'web developer', 'mobile developer', 'android developer', 'ios developer',
+            'programmer', 'analyst programmer', 'technical lead', 'engineering manager', 'cto'
+        ];
+
+        const SUS_KEYWORDS = ['training fee', 'placement fee', 'unpaid training', 'backdoor', 'registration fee', 'pay later', 'investment', 'consultancy charges'];
+
+        const COMPANIES = [
+            { name: "Google", type: "Custom", url: "https://careers.google.com/" }, { name: "Microsoft", type: "Custom", url: "https://careers.microsoft.com/" },
+            { name: "Amazon", type: "Custom", url: "https://amazon.jobs/" }, { name: "Stripe", type: "Greenhouse", token: "stripe" },
+            { name: "Netflix", type: "Greenhouse", token: "netflix" }, { name: "Airbnb", type: "Greenhouse", token: "airbnb" },
+            { name: "Uber", type: "Greenhouse", token: "uber" }, { name: "Twitch", type: "Greenhouse", token: "twitch" },
+            { name: "DoorDash", type: "Greenhouse", token: "doordash" }, { name: "GitLab", type: "Greenhouse", token: "gitlab" },
+            { name: "Swiggy", type: "Lever", token: "swiggy" }, { name: "Zomato", type: "Lever", token: "zomato" },
+            { name: "PhonePe", type: "Lever", token: "phonepe" }, { name: "Zoho", type: "Custom", url: "https://www.zoho.com/careers/" },
+            { name: "Freshworks", type: "Custom", url: "https://www.freshworks.com/company/careers/" },
+            { name: "Flipkart", type: "Greenhouse", token: "flipkart" }, { name: "Meesho", type: "Greenhouse", token: "meesho" },
+            { name: "Groww", type: "Greenhouse", token: "groww" }, { name: "ShareChat", type: "Greenhouse", token: "sharechat" },
+            { name: "Dream11", type: "Lever", token: "dreamsports" }, { name: "MPL", type: "Lever", token: "mpl" },
+            { name: "Cure.fit", type: "Lever", token: "curefit" }, { name: "Lenskart", type: "Lever", token: "lenskart" },
+            { name: "BigBasket", type: "Lever", token: "bigbasket" }, { name: "Blinkit", type: "Lever", token: "blinkit" },
+            { name: "Zepto", type: "Lever", token: "zepto" }, { name: "Ola", type: "Lever", token: "ola" },
+            { name: "Rapido", type: "Lever", token: "rapido" }, { name: "Nykaa", type: "Lever", token: "nykaa" },
+            { name: "InMobi", type: "Greenhouse", token: "inmobi" }, { name: "Glance", type: "Lever", token: "glance" },
+            { name: "Dailyhunt", type: "Lever", token: "dailyhunt" }, { name: "Spinny", type: "Greenhouse", token: "spinny" },
+            { name: "Cars24", type: "Lever", token: "cars24" }, { name: "CarDekho", type: "Lever", token: "cardekho" },
+            { name: "MakeMyTrip", type: "Lever", token: "makemytrip" }, { name: "Cleartrip", type: "Lever", token: "cleartrip" },
+            { name: "CRED", type: "Greenhouse", token: "cred" }, { name: "Razorpay", type: "Greenhouse", token: "razorpay" },
+            { name: "Ather Energy", type: "Lever", token: "atherenergy" }, { name: "Zerodha", type: "Custom", url: "https://zerodha.com/careers/" }
+        ];
+
+        const app = {
+            state: { jobs: [], visible: [], scanning: false, limit: 20 },
+            cities: ['Bangalore', 'Hyderabad', 'Pune', 'Mumbai', 'Delhi', 'Chennai', 'Gurgaon', 'Noida', 'India'],
+
+            log(msg, type = 'info') {
+                const el = document.getElementById('logs');
+                const div = document.createElement('div');
+                div.className = type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-green-400' : 'text-slate-400');
+                div.innerHTML = `<span class="opacity-50 mr-2">${new Date().toLocaleTimeString()}</span> ${msg}`;
+                el.appendChild(div); el.scrollTop = el.scrollHeight;
+            },
+
+            toggleSidebar() {
+                document.getElementById('sidebar').classList.toggle('open');
+                document.getElementById('mobile-overlay').classList.toggle('open');
+            },
+
+            async fetchProxy(url) {
+                try {
+                    const t = Date.now();
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}&t=${t}`;
+                    const res = await fetch(proxyUrl);
+                    if (!res.ok) throw new Error("Failed");
+                    const data = await res.json();
+                    return data.contents;
+                } catch (e) { return null; }
+            },
+
+            getTrustScore(company) {
+                let hash = 0;
+                for (let i = 0; i < company.length; i++) hash = company.charCodeAt(i) + ((hash << 5) - hash);
+                return (3.5 + (Math.abs(hash) % 15) / 10).toFixed(1);
+            },
+
+            isRedFlag(job) {
+                const t = (job.role + ' ' + job.company).toLowerCase();
+                return SUS_KEYWORDS.some(k => t.includes(k));
+            },
+
+            isSpam(job) {
+                const t = (job.role + ' ' + job.company).toLowerCase();
+                if (t.includes('urgent') || t.includes('part time') || t.length < 10) return true;
+                return false;
+            },
+
+            isIndia(loc) {
+                if (!loc) return false;
+                const l = loc.toLowerCase();
+                return l.includes('india') || l.includes('bangalore') || l.includes('chennai') ||
+                    l.includes('mumbai') || l.includes('pune') || l.includes('delhi') || l.includes('noida') ||
+                    l.includes('gurgaon') || l.includes('hyderabad') || l.includes('karnataka');
+            },
+
+            // --- SCRAPERS ---
+            async scrapeWeWorkRemotely(keyword) {
+                this.log("Scanning WeWorkRemotely...");
+                try {
+                    const xml = await this.fetchProxy('https://weworkremotely.com/categories/remote-programming-jobs.rss');
+                    if (!xml) return [];
+                    const items = xml.split('<item>').slice(1);
+                    return items.map(item => {
+                        const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] || item.match(/<title>(.*?)<\/title>/)?.[1];
+                        const link = item.match(/<link>(.*?)<\/link>/)?.[1];
+                        if (!title || !link) return null;
+                        if (!title.toLowerCase().includes(keyword.toLowerCase())) return null;
+                        return {
+                            source: 'WeWorkRemotely', type: 'Portal', company: 'Remote', role: title,
+                            location: 'Remote', link: link, date: new Date().toISOString(), exp: 'N/A'
+                        };
+                    }).filter(x => x);
+                } catch (e) { return []; }
+            },
+
+            async scrapeStackOverflow(keyword) {
+                try {
+                    const url = `https://stackoverflow.com/jobs/feed?q=${encodeURIComponent(keyword)}`;
+                    const xml = await this.fetchProxy(url);
+                    if (!xml) return [];
+                    const items = xml.split('<item>').slice(1);
+                    return items.map(item => {
+                        const title = item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1] || item.match(/<title>(.*?)<\/title>/)?.[1];
+                        const link = item.match(/<link>(.*?)<\/link>/)?.[1];
+                        if (!title || !link) return null;
+                        return {
+                            source: 'StackOverflow', type: 'Portal', company: 'Global Tech', role: title,
+                            location: 'Global', link: link, date: new Date().toISOString(), exp: 'N/A'
+                        };
+                    }).filter(x => x);
+                } catch (e) { return []; }
+            },
+
+            async scrapeLinkedIn(keywords) {
+                const globalMode = document.getElementById('global-mode').checked;
+                const targets = globalMode ? ['India', 'USA', 'Remote'] : ['Bangalore', 'Chennai', 'Hyderabad', 'Pune'];
+                let all = [];
+                const pages = [0, 25];
+
+                for (const kw of keywords) {
+                    this.log(`Deep Scanning LinkedIn: ${kw}...`);
+                    const promises = targets.flatMap((loc, idx) =>
+                        pages.map(async (start) => {
+                            await new Promise(r => setTimeout(r, (idx * 600) + (start * 2)));
+                            try {
+                                const html = await this.fetchProxy(`https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(kw)}&location=${encodeURIComponent(loc)}&start=${start}`);
+                                if (!html) return [];
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                return Array.from(doc.querySelectorAll('li')).map(li => {
+                                    const title = li.querySelector('h3.base-search-card__title')?.innerText.trim();
+                                    const company = li.querySelector('h4.base-search-card__subtitle')?.innerText.trim();
+                                    const location = li.querySelector('span.job-search-card__location')?.innerText.trim() || loc;
+                                    const link = li.querySelector('a.base-card__full-link')?.href.split('?')[0];
+                                    const time = li.querySelector('time')?.getAttribute('datetime');
+                                    if (!title || !link) return null;
+                                    return {
+                                        source: 'LinkedIn', type: 'Portal', company: company || 'Confidential', role: title, location: location,
+                                        link: link, date: time || new Date().toISOString(), exp: 'N/A'
+                                    };
+                                }).filter(x => x);
+                            } catch (e) { return []; }
+                        })
+                    );
+                    const results = await Promise.all(promises);
+                    all.push(...results.flat());
+                }
+                return all;
+            },
+
+            async scrapeRemotive(keywords) {
+                try {
+                    const res = await fetch(`https://remotive.com/api/remote-jobs?search=${encodeURIComponent(keywords[0])}&limit=50`);
+                    const data = await res.json();
+                    const globalMode = document.getElementById('global-mode').checked;
+                    return data.jobs.filter(j => globalMode || (j.candidate_required_location || '').toLowerCase().includes('india')).map(j => ({
+                        source: 'Remotive', type: 'Portal', company: j.company_name, role: j.title, location: 'Remote',
+                        link: j.url, date: j.publication_date, exp: 'N/A'
+                    }));
+                } catch (e) { return []; }
+            },
+
+            async scrapeGreenhouse(company, token) { try { let data; try { const res = await fetch(`https://boards-api.greenhouse.io/v1/boards/${token}/jobs`); data = await res.json(); } catch (e) { try { const raw = await this.fetchProxy(`https://boards-api.greenhouse.io/v1/boards/${token}/jobs`); data = JSON.parse(raw); } catch (e2) { this.log(`Error parsing Greenhouse for ${company}`, 'error'); return []; } } const jobs = (data.jobs || []).map(j => ({ source: 'Greenhouse', type: 'Career', company: company, role: j.title, location: j.location?.name || 'Unknown', link: j.absolute_url, date: j.updated_at, exp: this.guessExp(j.title) })); return this.filterLoc(jobs); } catch (e) { return []; } },
+            async scrapeLever(company, token) { try { const res = await fetch(`https://api.lever.co/v0/postings/${token}`); const data = await res.json(); const jobs = data.map(j => ({ source: 'Lever', type: 'Career', company: company, role: j.text, location: j.categories?.location || 'Unknown', link: j.applyUrl, date: null, exp: this.guessExp(j.title || j.text) })); return this.filterLoc(jobs); } catch (e) { return []; } },
+
+            filterLoc(jobs) {
+                const globalMode = document.getElementById('global-mode').checked;
+                return globalMode ? jobs : jobs.filter(j => this.isIndia(j.location) || j.location.toLowerCase().includes('remote'));
+            },
+
+            guessExp(title) { const t = (title || '').toLowerCase(); if (t.includes('senior') || t.includes('lead')) return '5+'; if (t.includes('iii')) return '3-5'; return '0-2'; },
+
+            generateSmartLinks(keywords) {
+                const q = encodeURIComponent(keywords.join(' '));
+                const global = document.getElementById('global-mode').checked;
+                const lDork = global ? '' : ' location:india';
+                const lUrl = global ? '' : '&l=India';
+
+                const links = [
+                    { role: 'Search Naukri.com', company: 'Naukri', location: 'India', link: `https://www.naukri.com/code-jobs?k=${q}`, source: 'Naukri', type: 'Portal', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                    { role: 'Search Foundit', company: 'Foundit', location: 'India', link: `https://www.foundit.in/srp/results?query=${q}`, source: 'Foundit', type: 'Portal', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                    { role: 'Search HirePro Jobs', company: 'HirePro', location: global ? 'Global' : 'India', link: `https://www.google.com/search?q=site:hirepro.in+${q}${lDork}`, source: 'Google', type: 'Portal', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                    { role: 'Search Workday Jobs', company: 'Workday', location: global ? 'Global' : 'India', link: `https://www.google.com/search?q=site:myworkdayjobs.com+${q}${lDork}`, source: 'Google', type: 'Career', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                    { role: 'Search Glassdoor', company: 'Glassdoor', location: global ? 'Global' : 'India', link: `https://www.glassdoor.co.in/Job/india-${q}-jobs-SRCH_IL.0,5_IN115_KO6,${q.length + 6}.htm`, source: 'Glassdoor', type: 'Portal', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                    { role: 'Search Indeed', company: 'Indeed', location: global ? 'Global' : 'India', link: `https://in.indeed.com/jobs?q=${q}${lUrl}`, source: 'Indeed', type: 'Portal', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                    { role: 'Search Instahyre', company: 'Instahyre', location: 'India', link: `https://www.instahyre.com/search-jobs?q=${q}`, source: 'Instahyre', type: 'Portal', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                    { role: 'Search SmartRecruiters', company: 'SmartRecruiters', location: global ? 'Global' : 'India', link: `https://www.google.com/search?q=site:smartrecruiters.com+${q}${lDork}`, source: 'Google', type: 'Career', date: new Date().toISOString(), trust: 5, exp: 'N/A' },
+                ];
+                return links.filter(l => global || l.location === 'India');
+            },
+
+            async scan() {
+                if (this.state.scanning) return;
+                this.state.scanning = true; this.state.jobs = []; this.state.limit = 20;
+
+                const btn = document.getElementById('btn-scan');
+                btn.disabled = true; btn.classList.add('opacity-50', 'animate-pulse');
+                document.getElementById('status-text').innerText = "Scanning Active...";
+                document.getElementById('job-list').innerHTML = '';
+
+                const kwInput = document.getElementById('keywords').value;
+                const keywords = kwInput.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                if (!keywords.length) { this.state.scanning = false; btn.disabled = false; return; }
+
+                this.log(`Deep Scan Initiated (v19)...`);
+
+                // 1. Smart Links
+                this.generateSmartLinks(keywords).forEach(j => this.addJob(j));
+
+                // 2. Scrapers
+                const pPortals = Promise.all([
+                    this.scrapeLinkedIn(keywords).then(jobs => jobs.forEach(j => this.addJob(j))),
+                    this.scrapeRemotive(keywords).then(jobs => jobs.forEach(j => this.addJob(j))),
+                    this.scrapeStackOverflow(keywords[0]).then(jobs => jobs.forEach(j => this.addJob(j))),
+                    this.scrapeWeWorkRemotely(keywords[0]).then(jobs => jobs.forEach(j => this.addJob(j)))
+                ]);
+
+                // 3. ATS Batching
+                const batchSize = 10;
+                let currentIdx = 0;
+                const processATS = async () => {
+                    while (currentIdx < COMPANIES.length) {
+                        const batch = COMPANIES.slice(currentIdx, currentIdx + batchSize);
+                        currentIdx += batchSize;
+                        this.log(`Checking ATS batch ${currentIdx - batch.length + 1}-${Math.min(currentIdx, COMPANIES.length)}...`);
+                        const promises = batch.map(c => {
+                            if (c.type === 'Greenhouse') return this.scrapeGreenhouse(c.name, c.token);
+                            if (c.type === 'Lever') return this.scrapeLever(c.name, c.token);
+                            return [];
+                        });
+                        const results = await Promise.all(promises);
+                        results.flat().forEach(j => this.addJob(j));
+                        const pct = (Math.min(currentIdx, COMPANIES.length) / COMPANIES.length) * 100;
+                        document.getElementById('progress').style.width = `${pct}%`;
+                        this.updateDynamicFilters();
+                        await new Promise(r => setTimeout(r, 100)); // Minor delay
+                    }
+                };
+
+                await Promise.all([pPortals, processATS()]);
+
+                this.log("Scan Finished", "success");
+                document.getElementById('status-text').innerText = "Scan Finished";
+                btn.disabled = false; btn.classList.remove('opacity-50', 'animate-pulse');
+                this.state.scanning = false;
+            },
+
+            addJob(job) {
+                if (this.state.jobs.some(j => j.link === job.link)) return;
+
+                const strict = document.getElementById('strict-mode').checked;
+                const global = document.getElementById('global-mode').checked;
+                const kwInput = document.getElementById('keywords').value;
+                const keywords = kwInput.toLowerCase().split(',').map(s => s.trim()).filter(s => s);
+
+                // 1. Location Strictness
+                if (!global && !this.isIndia(job.location) && job.location !== 'Remote' && !job.source.includes('Search')) return;
+
+                // 2. Keyword Strictness (SMART WHITELIST v19)
+                job.matchType = 'none';
+                if (strict && !job.source.includes('Search')) {
+                    const content = ((job.role || '') + ' ' + (job.company || '')).toLowerCase();
+                    const hasKeyword = keywords.some(k => content.includes(k));
+
+                    if (hasKeyword) {
+                        job.matchType = 'exact';
+                    } else if (job.type === 'Career') {
+                        // Only allow if title is generically "SAFE" (e.g. Software Eng) but not "Java Dev" if we want React.
+                        // We check if title ONLY contains whitelisted phrases + meaningless words? No, simpler:
+                        // If title contains a whitelist phrase, we assume it's relevant enough to show if description (which we can't see) matches.
+                        // But wait, "Senior Java Developer" contains "Developer". If "Developer" is generic, it passes.
+                        // We MUST catch specific irrelevance.
+                        // Solution: Check if the title contains ANY GENERIC_ROLE.
+                        const isGeneric = GENERIC_ROLES.some(r => content.includes(r));
+                        if (isGeneric) {
+                            job.matchType = 'smart';
+                        } else {
+                            return; // Not exact keyword, and not a safe generic title -> HIDE.
+                        }
+                    } else {
+                        return; // Not Career and not exact -> HIDE.
+                    }
+                }
+
+                job.trust = this.getTrustScore(job.company);
+                job.spam = this.isSpam(job);
+                job.redFlag = this.isRedFlag(job);
+                job.priority = this.isIndia(job.location) ? 2 : 1;
+                if (!job.date) job.date = new Date().toISOString();
+                this.state.jobs.push(job);
+                this.filter();
+            },
+
+            updateDynamicFilters() {
+                const updateSelect = (id, key) => {
+                    const sel = document.getElementById(id);
+                    const existing = new Set(Array.from(sel.options).map(o => o.value));
+                    const values = [...new Set(this.state.jobs.map(j => j[key]))].sort();
+                    values.forEach(v => { if (v && !existing.has(v)) sel.add(new Option(v, v)); });
+                };
+                updateSelect('filter-loc', 'location');
+                updateSelect('filter-company', 'company');
+            },
+
+            filter() {
+                const search = document.getElementById('search').value.toLowerCase();
+                const fLoc = document.getElementById('filter-loc').value;
+                const fDate = document.getElementById('filter-date').value;
+                const fComp = document.getElementById('filter-company').value;
+                const fType = document.getElementById('filter-type').value;
+                const sortBy = document.getElementById('sort-by').value;
+
+                let res = this.state.jobs.filter(j => {
+                    if (search && !JSON.stringify(j).toLowerCase().includes(search)) return false;
+                    if (fLoc !== 'all' && j.location !== fLoc) return false;
+                    if (fComp !== 'all' && j.company !== fComp) return false;
+                    if (fType !== 'all' && fType !== j.type) return false;
+                    if (fDate !== 'all') {
+                        const days = parseInt(fDate);
+                        const diff = (new Date() - new Date(j.date)) / (1000 * 60 * 60 * 24);
+                        if (diff > days) return false;
+                    }
+                    return true;
+                });
+
+                res.sort((a, b) => {
+                    if (sortBy === 'relevance') {
+                        if (a.redFlag && !b.redFlag) return 1;
+                        if (!a.redFlag && b.redFlag) return -1;
+                        if (a.priority !== b.priority) return b.priority - a.priority;
+                        if (a.source.includes('Search')) return -1;
+                        return new Date(b.date) - new Date(a.date);
+                    }
+                    if (sortBy === 'date_desc') return new Date(b.date) - new Date(a.date);
+                    if (sortBy === 'date_asc') return new Date(a.date) - new Date(b.date);
+                    if (sortBy === 'role_asc') return a.role.localeCompare(b.role);
+                    if (sortBy === 'role_desc') return b.role.localeCompare(a.role);
+                    if (sortBy === 'company_asc') return a.company.localeCompare(b.company);
+                    return 0;
+                });
+
+                this.state.visible = res;
+                this.render();
+            },
+
+            render() {
+                const container = document.getElementById('job-list');
+                const loadMore = document.getElementById('load-more-container');
+                document.getElementById('stat-total').innerText = this.state.visible.length;
+
+                if (this.state.visible.length === 0 && !this.state.scanning) {
+                    container.innerHTML = `<div class="text-center text-slate-600 mt-10">No jobs found matching filters.</div>`;
+                    loadMore.classList.add('hidden');
+                    return;
+                }
+
+                const list = this.state.visible.slice(0, this.state.limit);
+
+                const html = list.map(j => {
+                    const isIndia = this.isIndia(j.location);
+                    const isGlobal = !isIndia && j.location !== 'Remote';
+                    const dateStr = j.date ? new Date(j.date).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'New';
+                    const stars = Math.round(j.trust);
+
+                    let badges = `<span class="badge ${j.type === 'Portal' ? 'badge-portal' : 'badge-greenhouse'}">${j.source}</span>`;
+                    if (isIndia) badges += ` <span class="badge badge-india">🇮🇳 INDIA</span>`;
+                    else if (isGlobal) badges += ` <span class="badge badge-global">🌍 GLOBAL</span>`;
+                    if (j.spam) badges += ` <span class="badge badge-spam">🚩 POTENTIAL SPAM</span>`;
+                    if (j.redFlag) badges += ` <span class="badge bg-red-600 text-white animate-pulse">🚩 RED FLAG</span>`;
+
+                    // Match Type Badge
+                    if (j.matchType === 'exact') badges += ` <span class="badge badge-exact">✅ EXACT MATCH</span>`;
+                    else if (j.matchType === 'smart') badges += ` <span class="badge badge-generic">🧠 SMART MATCH</span>`;
+
+                    return `
+                    <div class="job-card bg-slate-900/60 p-4 rounded-lg mb-3 border border-slate-800 hover:border-indigo-500/50 group relative overflow-hidden ${isIndia ? 'border-l-indigo-500 bg-indigo-900/5' : ''} ${j.redFlag ? 'border-red-600/50 bg-red-900/10' : ''}">
+                        <div class="flex justify-between items-start gap-4">
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-bold text-slate-200 text-sm truncate max-w-full" title="${j.role}">${j.role}</h3>
+                                <div class="text-xs text-slate-400 font-medium flex items-center flex-wrap gap-2 mt-1">
+                                     <span class="text-indigo-300"><i class="fa-solid fa-building"></i> ${j.company}</span>
+                                     <span>•</span>
+                                     <span><i class="fa-solid fa-map-pin"></i> ${j.location}</span>
+                                </div>
+                                <div class="mt-2 flex flex-wrap gap-1.5">${badges} <span class="badge bg-slate-800 text-slate-500 font-mono tracking-tighter">${dateStr}</span></div>
+                            </div>
+                            <div class="flex flex-col items-end shrink-0 gap-2">
+                                <div class="flex gap-0.5 text-[8px] text-yellow-500/50 bg-yellow-500/5 px-2 py-1 rounded-full border border-yellow-500/10">${'<i class="fa-solid fa-star"></i>'.repeat(stars)}</div>
+                                <a href="${j.link}" target="_blank" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] font-bold rounded shadow-lg shadow-indigo-600/20 active:scale-95 transition flex items-center gap-1 group-hover:w-auto uppercase">
+                                    APPLY <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+                container.innerHTML = html;
+                if (this.state.visible.length > this.state.limit) {
+                    loadMore.classList.remove('hidden');
+                    loadMore.querySelector('button').innerText = `SHOW MORE (${this.state.limit}/${this.state.visible.length})`;
+                } else {
+                    loadMore.classList.add('hidden');
+                }
+            },
+
+            loadMore() { this.state.limit += 20; this.render(); },
+            resetFilters() { document.getElementById('search').value = ''; document.getElementById('filter-loc').value = 'all'; document.getElementById('filter-date').value = 'all'; document.getElementById('filter-company').value = 'all'; this.filter(); },
+            export(type) { if (this.state.jobs.length === 0) return alert("No jobs to export!"); const ws = XLSX.utils.json_to_sheet(this.state.jobs); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Jobs"); XLSX.writeFile(wb, "JobRadar_Results.xlsx"); }
+        };
+
+        app.log("System Ready. Please start scan.");
+    </script>
+</body>
+
+</html>

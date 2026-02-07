@@ -1,0 +1,621 @@
+company,ats_type,careers_url,location_filter
+Google,Custom,https://careers.google.com/jobs/results/?location=India,india
+Microsoft,Workday,https://careers.microsoft.com/professionals/us/en/l-india,india
+Amazon,Custom,https://www.amazon.jobs/en/locations/india,india
+Meta,Greenhouse,https://www.metacareers.com/jobs?locations[0]=India,india
+Apple,Custom,https://jobs.apple.com/en-in/search,india
+Netflix,Greenhouse,https://jobs.netflix.com/search?location=India,india
+Twitter/X,Greenhouse,https://careers.twitter.com/,india
+LinkedIn,Workday,https://careers.linkedin.com/,india
+Uber,Greenhouse,https://www.uber.com/in/en/careers/list/,india
+Airbnb,Greenhouse,https://careers.airbnb.com/positions/,india
+Spotify,Greenhouse,https://www.lifeatspotify.com/jobs,india
+Stripe,Greenhouse,https://stripe.com/jobs/search,india
+PayPal,Workday,https://careers.pypl.com/home/jobs,india
+Flipkart,Greenhouse,https://www.flipkartcareers.com/,india
+Swiggy,Lever,https://careers.swiggy.com/,india
+Zomato,Lever,https://www.zomato.com/careers,india
+Razorpay,Greenhouse,https://razorpay.com/jobs/,india
+PhonePe,Lever,https://www.phonepe.com/careers/,india
+Paytm,Custom,https://paytm.com/careers/,india
+CRED,Greenhouse,https://careers.cred.club/,india
+Meesho,Greenhouse,https://www.meesho.com/careers,india
+Groww,Greenhouse,https://groww.in/careers,india
+Zerodha,Custom,https://zerodha.com/careers/,india
+Upstox,Lever,https://upstox.com/careers/,india
+ShareChat,Greenhouse,https://sharechat.com/careers,india
+Dream11,Lever,https://www.dreamsports.group/careers,india
+MPL,Lever,https://www.mpl.live/careers,india
+Cure.fit,Lever,https://www.cult.fit/cult/careers,india
+Lenskart,Lever,https://www.lenskart.com/careers,india
+BigBasket,Lever,https://www.bigbasket.com/careers/,india
+Blinkit,Lever,https://blinkit.com/careers,india
+Zepto,Lever,https://www.zeptonow.com/careers,india
+OYO,Lever,https://www.oyorooms.com/careers/,india
+Ola,Lever,https://www.olacabs.com/careers,india
+Rapido,Lever,https://www.rapido.bike/careers,india
+Urban Company,Lever,https://careers.urbancompany.com/,india
+Nykaa,Lever,https://www.nykaa.com/careers,india
+PolicyBazaar,Lever,https://www.policybazaar.com/careers/,india
+Byju's,Lever,https://byjus.com/byjus-careers/,india
+Unacademy,Lever,https://unacademy.com/careers,india
+upGrad,Lever,https://www.upgrad.com/careers/,india
+Vedantu,Lever,https://www.vedantu.com/careers,india
+Physics Wallah,Custom,https://www.pw.live/careers,india
+Jio,Custom,https://careers.jio.com/,india
+Hotstar,Custom,https://tech.hotstar.com/careers/,india
+InMobi,Greenhouse,https://www.inmobi.com/company/careers,india
+Glance,Lever,https://www.glance.com/careers,india
+Dailyhunt,Lever,https://www.dailyhunt.in/careers,india
+Dunzo,Lever,https://www.dunzo.com/careers,india
+Spinny,Greenhouse,https://www.spinny.com/careers/,india
+Cars24,Lever,https://www.cars24.com/careers/,india
+CarDekho,Lever,https://www.cardekho.com/careers,india
+Droom,Lever,https://droom.in/careers,india
+MakeMyTrip,Lever,https://careers.makemytrip.com/,india
+Cleartrip,Lever,https://www.cleartrip.com/careers/,india
+redBus,Lever,https://www.redbus.in/careers,india
+ixigo,Lever,https://www.ixigo.com/careers,india
+Yatra,Lever,https://www.yatra.com/careers,india
+EaseMyTrip,Custom,https://www.easemytrip.com/careers.html,india
+Ola Electric,Lever,https://olaelectric.com/careers,india
+Ather Energy,Lever,https://www.atherenergy.com/careers,india
+Bounce,Lever,https://www.bounce.bike/careers,india
+Vogo,Lever,https://www.vogo.in/careers,india
+Yulu,Lever,https://www.yulu.bike/careers,india
+BluSmart,Lever,https://www.blusmart.in/careers,india
+Revv,Lever,https://www.revv.co.in/careers,india
+Zoomcar,Lever,https://www.zoomcar.com/careers,india
+Payu,Lever,https://payu.in/careers,india
+Pine Labs,Lever,https://www.pinelabs.com/careers,india
+BharatPe,Lever,https://www.bharatpe.com/careers,india
+Slice,Lever,https://www.sliceit.com/careers,india
+Jupiter,Lever,https://jupiter.money/careers/,india
+Fi,Lever,https://fi.money/careers,india
+Niyo,Lever,https://www.goniyo.com/careers/,india
+Open,Lever,https://open.money/careers,india
+Rupeek,Lever,https://rupeek.com/careers,india
+Khatabook,Lever,https://khatabook.com/careers/,india
+Lendingkart,Lever,https://www.lendingkart.com/careers/,india
+Capital Float,Lever,https://capitalfloat.com/careers/,india
+ZestMoney,Lever,https://www.zestmoney.in/careers,india
+Simpl,Lever,https://getsimpl.com/careers/,india
+LazyPay,Lever,https://www.lazypay.in/careers,india
+MoneyTap,Lever,https://www.moneytap.com/careers,india
+EarlySalary,Lever,https://www.earlysalary.com/careers,india
+CASHe,Lever,https://www.cashe.co.in/careers,india
+KreditBee,Lever,https://www.kreditbee.in/careers,india
+Stashfin,Lever,https://stashfin.com/careers,india
+Faircent,Lever,https://www.faircent.com/careers,india
+Indifi,Lever,https://www.indifi.com/careers,india
+Fibe,Lever,https://www.fibe.in/careers,india
+Kissht,Lever,https://www.kissht.com/careers,india
+FlexiLoans,Lever,https://www.flexiloans.com/careers,india
+NeoGrowth,Lever,https://www.neogrowth.in/careers,india
+Vivriti Capital,Lever,https://www.vivriticapital.com/careers,india
+ClearTax,Lever,https://cleartax.in/careers,india
+Smallcase,Lever,https://www.smallcase.com/careers,india
+Kuvera,Lever,https://kuvera.in/careers,india
+INDmoney,Lever,https://www.indmoney.com/careers,india
+Scripbox,Lever,https://scripbox.com/careers,india
+Fisdom,Lever,https://www.fisdom.com/careers,india
+Paytm Money,Lever,https://www.paytmmoney.com/careers,india
+Angel One,Custom,https://www.angelone.in/careers,india
+5paisa,Custom,https://www.5paisa.com/careers,india
+Dhan,Lever,https://dhan.co/careers,india
+Fyers,Custom,https://fyers.in/careers,india
+Coin DCX,Lever,https://coindcx.com/careers,india
+WazirX,Lever,https://wazirx.com/careers,india
+CoinSwitch,Lever,https://coinswitch.co/careers,india
+Mudrex,Lever,https://mudrex.com/careers,india
+Vauld,Lever,https://www.vauld.com/careers,india
+BitBNS,Custom,https://bitbns.com/careers,india
+ZebPay,Custom,https://zebpay.com/careers,india
+Digit Insurance,Lever,https://www.godigit.com/careers,india
+Acko,Lever,https://www.acko.com/careers,india
+Turtlemint,Lever,https://www.turtlemint.com/careers,india
+RenewBuy,Lever,https://www.renewbuy.com/careers,india
+InsuranceDekho,Lever,https://www.insurancedekho.com/careers,india
+Coverfox,Lever,https://www.coverfox.com/careers,india
+Plum,Lever,https://www.plumhq.com/careers,india
+Nova Benefits,Lever,https://www.novabenefits.com/careers,india
+Pazcare,Lever,https://www.pazcare.com/careers,india
+Onsurity,Lever,https://www.onsurity.com/careers,india
+Vital,Lever,https://www.vitalhealth.in/careers,india
+Myntra,Lever,https://www.myntra.com/careers,india
+Ajio,Lever,https://www.ajio.com/careers,india
+FirstCry,Lever,https://www.firstcry.com/careers,india
+1mg,Lever,https://www.1mg.com/careers,india
+Pharmeasy,Lever,https://pharmeasy.in/careers,india
+Netmeds,Lever,https://www.netmeds.com/careers,india
+HealthKart,Lever,https://www.healthkart.com/careers,india
+Pepperfry,Lever,https://www.pepperfry.com/careers.html,india
+Urban Ladder,Lever,https://www.urbanladder.com/careers,india
+Livspace,Lever,https://www.livspace.com/in/careers,india
+Homelane,Lever,https://www.homelane.com/careers,india
+Purplle,Lever,https://www.purplle.com/careers,india
+Sugar Cosmetics,Lever,https://in.sugarcosmetics.com/pages/careers,india
+Mamaearth,Lever,https://mamaearth.in/careers,india
+boAt,Lever,https://www.boat-lifestyle.com/pages/careers,india
+Noise,Lever,https://www.gonoise.com/pages/careers,india
+Fire-Boltt,Lever,https://www.fireboltt.com/careers,india
+WOW Skin Science,Lever,https://www.buywow.in/careers,india
+mCaffeine,Lever,https://www.mcaffeine.com/careers,india
+Plum Goodness,Lever,https://plumgoodness.com/careers,india
+Beardo,Lever,https://beardo.in/careers,india
+The Man Company,Lever,https://www.themancompany.com/careers,india
+Bombay Shaving Company,Lever,https://bombayshavingcompany.com/careers,india
+Licious,Lever,https://www.licious.in/careers,india
+FreshToHome,Lever,https://www.freshtohome.com/careers,india
+Country Delight,Lever,https://www.countrydelight.in/careers,india
+Milkbasket,Lever,https://www.milkbasket.com/careers,india
+Supr Daily,Lever,https://suprdaily.com/careers,india
+BB Daily,Lever,https://www.bbdaily.com/careers,india
+DailyNinja,Lever,https://www.dailyninja.in/careers,india
+JioMart,Custom,https://www.jiomart.com/careers,india
+Reliance Digital,Custom,https://www.reliancedigital.in/careers,india
+Croma,Custom,https://www.croma.com/careers,india
+Tata Cliq,Custom,https://www.tatacliq.com/careers,india
+Shoppers Stop,Custom,https://www.shoppersstop.com/careers,india
+Lifestyle,Custom,https://www.lifestylestores.com/careers,india
+Max Fashion,Custom,https://www.maxfashion.in/careers,india
+FabIndia,Custom,https://www.fabindia.com/careers,india
+Westside,Custom,https://www.westside.com/careers,india
+Bewakoof,Lever,https://www.bewakoof.com/careers,india
+The Souled Store,Lever,https://www.thesouledstore.com/careers,india
+Snitch,Lever,https://www.snitch.co.in/careers,india
+Urbanic,Lever,https://www.urbanic.com/careers,india
+HRX,Lever,https://www.hrxbrand.com/careers,india
+Rare Rabbit,Custom,https://www.rfrb.co/careers,india
+Jack & Jones,Custom,https://www.jackjones.in/careers,india
+Wrogn,Custom,https://wrogn.com/careers,india
+Campus,Custom,https://campusshoes.com/careers,india
+Sparx,Custom,https://www.sparxshoes.in/careers,india
+Bata,Custom,https://www.bata.in/careers,india
+Metro Shoes,Custom,https://www.metroshoes.net/careers,india
+Woodland,Custom,https://www.woodlandworldwide.com/careers,india
+Decathlon,Custom,https://www.decathlon.in/careers,india
+Skechers,Custom,https://www.skechers.in/careers,india
+Puma,Custom,https://in.puma.com/in/en/careers,india
+Adidas,Custom,https://www.adidas.co.in/careers,india
+Nike,Custom,https://www.nike.com/in/careers,india
+Reebok,Custom,https://www.reebok.in/careers,india
+ASICS,Custom,https://www.asics.com/in/en-in/careers,india
+Crocs,Custom,https://www.crocs.in/careers,india
+Rebel Foods,Lever,https://www.rebelfoods.com/careers,india
+Box8,Lever,https://www.box8.in/careers,india
+Faasos,Lever,https://www.faasos.com/careers,india
+EatFit,Lever,https://www.eatfit.in/careers,india
+FreshMenu,Lever,https://www.freshmenu.com/careers,india
+Chaayos,Lever,https://www.chaayos.com/careers,india
+Third Wave Coffee,Lever,https://thirdwavecoffee.in/careers,india
+Blue Tokai,Lever,https://bluetokaicoffee.com/careers,india
+Sleepy Owl,Lever,https://sleepyowl.co/careers,india
+Rage Coffee,Lever,https://ragecoffee.com/careers,india
+True Elements,Lever,https://www.trueelements.com/careers,india
+Epigamia,Lever,https://www.epigamia.com/careers,india
+Paperboat,Lever,https://paperboatdrinks.com/careers,india
+Raw Pressery,Lever,https://www.rawpressery.com/careers,india
+Lahori,Lever,https://lahori.in/careers,india
+Bira 91,Lever,https://www.bira91.com/careers,india
+Simplilearn,Lever,https://www.simplilearn.com/careers,india
+Scaler,Lever,https://www.scaler.com/careers,india
+Masai School,Lever,https://www.masaischool.com/careers,india
+Newton School,Lever,https://www.newtonschool.co/careers,india
+Coding Ninjas,Lever,https://www.codingninjas.com/careers,india
+PrepBytes,Lever,https://www.prepbytes.com/careers,india
+AlmaBetter,Lever,https://www.almabetter.com/careers,india
+Coding Blocks,Lever,https://codingblocks.com/careers,india
+Pepcoding,Lever,https://www.pepcoding.com/careers,india
+InterviewBit,Lever,https://www.interviewbit.com/careers,india
+GeeksforGeeks,Custom,https://www.geeksforgeeks.org/careers/,india
+HackerRank,Greenhouse,https://www.hackerrank.com/careers,india
+HackerEarth,Lever,https://www.hackerearth.com/careers/,india
+Toppr,Lever,https://www.toppr.com/careers,india
+Doubtnut,Lever,https://www.doubtnut.com/careers,india
+Testbook,Lever,https://testbook.com/careers,india
+Gradeup,Lever,https://gradeup.co/careers,india
+Embibe,Lever,https://www.embibe.com/careers,india
+Extramarks,Custom,https://www.extramarks.com/careers,india
+Meritnation,Custom,https://www.meritnation.com/careers,india
+Cuemath,Lever,https://www.cuemath.com/careers,india
+WhiteHat Jr,Custom,https://www.whitehatjr.com/careers,india
+Camp K12,Lever,https://campk12.com/careers,india
+Codingal,Lever,https://www.codingal.com/careers,india
+Tinkerly,Lever,https://www.tinkerly.in/careers,india
+STEMpedia,Lever,https://www.stempedia.com/careers,india
+SP Robotics,Custom,https://www.sproboticworks.com/careers,india
+Lead School,Lever,https://leadschool.in/careers,india
+Teachmint,Lever,https://www.teachmint.com/careers,india
+Classplus,Lever,https://classplusapp.com/careers,india
+Winuall,Lever,https://www.winuall.com/careers,india
+Adda247,Lever,https://www.adda247.com/careers,india
+Oliveboard,Lever,https://www.oliveboard.in/careers,india
+iQuanta,Custom,https://www.iquanta.in/careers,india
+Career360,Custom,https://www.careers360.com/careers,india
+Shiksha,Custom,https://www.shiksha.com/careers,india
+CollegeDunia,Lever,https://collegedunia.com/careers,india
+Collegedekho,Lever,https://www.collegedekho.com/careers,india
+Practo,Lever,https://www.practo.com/careers,india
+Portea Medical,Lever,https://www.portea.com/careers/,india
+DocsApp,Lever,https://www.docsapp.in/careers,india
+MFine,Lever,https://www.mfine.co/careers,india
+Pristyn Care,Lever,https://www.pristyncare.com/careers/,india
+Meddo Health,Lever,https://www.meddo.in/careers,india
+HealthifyMe,Lever,https://www.healthifyme.com/careers/,india
+GOQii,Lever,https://goqii.com/in-en/careers,india
+Ultrahuman,Lever,https://www.ultrahuman.com/careers,india
+Dozee,Lever,https://www.dozee.io/careers,india
+SigTuple,Lever,https://sigtuple.com/careers/,india
+Niramai,Lever,https://www.niramai.com/careers,india
+Qure.ai,Lever,https://qure.ai/careers/,india
+Tricog,Lever,https://www.tricog.com/careers,india
+BeatO,Lever,https://www.beatoapp.com/careers,india
+Phable Care,Lever,https://phablecare.com/careers,india
+Apollo 247,Custom,https://www.apollo247.com/careers,india
+Truemeds,Lever,https://www.truemeds.in/careers,india
+Generico,Lever,https://www.generico.in/careers,india
+SastaSundar,Lever,https://www.sastasundar.com/careers,india
+Naukri,Custom,https://www.naukri.com/careers,india
+Indeed India,Custom,https://www.indeed.com/cmp/Indeed/jobs,india
+Monster India,Custom,https://www.monsterindia.com/careers,india
+Shine.com,Custom,https://www.shine.com/careers,india
+TimesJobs,Custom,https://www.timesjobs.com/careers,india
+Freshersworld,Custom,https://www.freshersworld.com/careers,india
+Hirist,Custom,https://www.hirist.com/careers,india
+Instahyre,Lever,https://www.instahyre.com/careers,india
+CutShort,Lever,https://cutshort.io/careers,india
+AngelList India,Greenhouse,https://angel.co/careers,india
+Turing,Lever,https://www.turing.com/careers,india
+Toptal,Custom,https://www.toptal.com/careers,india
+Talent500,Lever,https://talent500.co/careers,india
+Belong,Lever,https://belong.co/careers,india
+Skillenza,Lever,https://skillenza.com/careers,india
+Darwinbox,Lever,https://darwinbox.com/careers,india
+Keka,Lever,https://www.keka.com/careers,india
+GreytHR,Custom,https://www.greythr.com/careers,india
+Zoho People,Custom,https://www.zoho.com/people/careers.html,india
+SumHR,Lever,https://www.sumhr.com/careers,india
+Zimyo,Lever,https://www.zimyo.com/careers,india
+factoHR,Custom,https://factohr.com/careers,india
+HROne,Lever,https://hrone.cloud/careers,india
+PocketHRMS,Lever,https://www.pockethrms.com/careers,india
+Freshworks,Greenhouse,https://www.freshworks.com/company/careers/,india
+Zoho,Custom,https://www.zoho.com/careers.html,india
+Chargebee,Greenhouse,https://www.chargebee.com/company/careers/,india
+Postman,Greenhouse,https://www.postman.com/company/careers/,india
+BrowserStack,Greenhouse,https://www.browserstack.com/careers,india
+Druva,Greenhouse,https://www.druva.com/careers/,india
+Icertis,Greenhouse,https://www.icertis.com/company/careers/,india
+HighRadius,Greenhouse,https://www.highradius.com/careers/,india
+MindTickle,Greenhouse,https://www.mindtickle.com/company/careers/,india
+LeadSquared,Lever,https://www.leadsquared.com/careers/,india
+Whatfix,Greenhouse,https://whatfix.com/careers/,india
+CleverTap,Greenhouse,https://clevertap.com/careers/,india
+WebEngage,Lever,https://webengage.com/careers/,india
+MoEngage,Greenhouse,https://www.moengage.com/careers/,india
+Sprinklr,Greenhouse,https://www.sprinklr.com/careers/,india
+Yellow.ai,Greenhouse,https://yellow.ai/careers/,india
+Observe.AI,Greenhouse,https://www.observe.ai/careers,india
+Haptik,Lever,https://haptik.ai/careers/,india
+Verloop,Lever,https://verloop.io/careers,india
+Gupshup,Lever,https://www.gupshup.io/careers,india
+Exotel,Lever,https://exotel.com/careers,india
+Knowlarity,Lever,https://www.knowlarity.com/careers,india
+Ozonetel,Lever,https://ozonetel.com/careers,india
+MyOperator,Lever,https://myoperator.com/careers,india
+Kaleyra,Lever,https://www.kaleyra.com/careers,india
+MSG91,Lever,https://msg91.com/careers,india
+Netcore Cloud,Lever,https://netcorecloud.com/careers,india
+Capillary Technologies,Lever,https://www.capillarytech.com/careers,india
+Manthan,Lever,https://manthan.com/careers/,india
+Salesken,Lever,https://www.salesken.ai/careers,india
+Vymo,Lever,https://www.getvymo.com/careers,india
+Leena AI,Lever,https://leena.ai/careers,india
+Hiver,Lever,https://hiverhq.com/careers,india
+Helpshift,Lever,https://www.helpshift.com/careers,india
+Kommunicate,Lever,https://www.kommunicate.io/careers,india
+Kapture CRM,Lever,https://www.kapturecrm.com/careers,india
+Kylas,Lever,https://kylas.io/careers,india
+Pepper Content,Lever,https://www.peppercontent.io/careers,india
+Wingify,Lever,https://wingify.com/careers,india
+ContentStack,Greenhouse,https://www.contentstack.com/careers,india
+Vwo,Lever,https://vwo.com/careers,india
+Hotjar,Greenhouse,https://www.hotjar.com/careers,india
+Mixpanel,Greenhouse,https://mixpanel.com/careers,india
+Amplitude,Greenhouse,https://amplitude.com/careers,india
+Heap,Greenhouse,https://heap.io/careers,india
+Pendo,Greenhouse,https://www.pendo.io/careers,india
+Appsflyer,Greenhouse,https://www.appsflyer.com/careers,india
+Branch,Greenhouse,https://branch.io/careers,india
+Adjust,Greenhouse,https://www.adjust.com/careers,india
+Singular,Greenhouse,https://www.singular.net/careers,india
+Segment,Greenhouse,https://segment.com/jobs/,india
+mParticle,Greenhouse,https://www.mparticle.com/careers,india
+RudderStack,Greenhouse,https://www.rudderstack.com/careers,india
+Airbyte,Greenhouse,https://airbyte.com/careers,india
+Fivetran,Greenhouse,https://www.fivetran.com/careers,india
+dbt Labs,Greenhouse,https://www.getdbt.com/careers,india
+Monte Carlo,Greenhouse,https://www.montecarlodata.com/careers,india
+Atlan,Lever,https://atlan.com/careers,india
+Alation,Greenhouse,https://www.alation.com/careers,india
+Collibra,Greenhouse,https://www.collibra.com/careers,india
+Informatica,Workday,https://careers.informatica.com/,india
+Talend,Greenhouse,https://www.talend.com/careers,india
+Alteryx,Workday,https://www.alteryx.com/careers,india
+Dataiku,Greenhouse,https://www.dataiku.com/careers,india
+Domino Data Lab,Greenhouse,https://www.dominodatalab.com/careers,india
+Weights & Biases,Greenhouse,https://wandb.ai/careers,india
+Neptune.ai,Greenhouse,https://neptune.ai/careers,india
+Comet ML,Greenhouse,https://www.comet.com/careers,india
+Fractal Analytics,Lever,https://fractal.ai/careers/,india
+Mu Sigma,Custom,https://www.mu-sigma.com/careers,india
+Tiger Analytics,Lever,https://www.tigeranalytics.com/careers/,india
+Sigmoid,Lever,https://www.sigmoid.com/careers/,india
+LatentView Analytics,Lever,https://www.latentview.com/careers/,india
+TheMathCompany,Lever,https://themathcompany.com/careers/,india
+Course5i,Lever,https://www.course5i.com/careers/,india
+Crayon Data,Lever,https://crayondata.com/careers/,india
+Mad Street Den,Lever,https://www.madstreetden.com/careers/,india
+Niki.ai,Lever,https://niki.ai/careers,india
+Vernacular.ai,Lever,https://vernacular.ai/careers,india
+Skit.ai,Lever,https://skit.ai/careers,india
+Uniphore,Lever,https://www.uniphore.com/careers,india
+Gnani.ai,Lever,https://gnani.ai/careers,india
+Staqu,Lever,https://www.staqu.com/careers,india
+Uncanny Vision,Lever,https://www.uncannyvision.com/careers,india
+Parallel Dots,Lever,https://paralleldots.com/careers,india
+Active.ai,Lever,https://active.ai/careers,india
+Arya.ai,Lever,https://arya.ai/careers,india
+Fluid AI,Lever,https://fluid.ai/careers,india
+Artivatic.ai,Lever,https://www.artivatic.ai/careers,india
+Cropin,Lever,https://www.cropin.com/careers,india
+AgNext,Lever,https://www.agnext.in/careers,india
+Intello Labs,Lever,https://www.intello.ag/careers,india
+Fasal,Lever,https://fasal.co/careers,india
+DeHaat,Lever,https://www.dehaat.com/careers,india
+Ninjacart,Lever,https://www.ninjacart.in/careers,india
+WayCool,Lever,https://waycool.in/careers,india
+Udaan,Lever,https://www.udaan.com/careers,india
+Jumbotail,Lever,https://www.jumbotail.com/careers,india
+ShopKirana,Lever,https://www.shopkirana.com/careers,india
+ElasticRun,Lever,https://www.elastic.run/careers,india
+Shadowfax,Lever,https://www.shadowfax.in/careers,india
+Delhivery,Lever,https://www.delhivery.com/careers,india
+Ecom Express,Custom,https://www.ecomexpress.in/careers,india
+XpressBees,Lever,https://www.xpressbees.com/careers,india
+BlueDart,Custom,https://www.bluedart.com/careers,india
+DTDC,Custom,https://www.dtdc.in/careers,india
+Gati,Custom,https://www.gati.com/careers,india
+Rivigo,Lever,https://www.rivigo.com/careers,india
+BlackBuck,Lever,https://www.blackbuck.com/careers,india
+Locus.sh,Lever,https://locus.sh/careers,india
+FarEye,Lever,https://fareye.com/careers,india
+Pickrr,Lever,https://www.pickrr.com/careers,india
+Shiprocket,Lever,https://www.shiprocket.in/careers,india
+Clickpost,Lever,https://www.clickpost.ai/careers,india
+Infosys,Custom,https://www.infosys.com/careers/,india
+TCS,Custom,https://www.tcs.com/careers,india
+Wipro,Custom,https://careers.wipro.com/,india
+HCL,Custom,https://www.hcltech.com/careers,india
+Tech Mahindra,Custom,https://careers.techmahindra.com/,india
+Cognizant,Workday,https://careers.cognizant.com/global-en/jobs/,india
+Accenture,Custom,https://www.accenture.com/in-en/careers,india
+Capgemini,Custom,https://www.capgemini.com/in-en/careers/,india
+LTIMindtree,Custom,https://www.ltimindtree.com/careers/,india
+Persistent Systems,Custom,https://www.persistent.com/careers/,india
+Mphasis,Custom,https://www.mphasis.com/careers.html,india
+Coforge,Custom,https://www.coforge.com/careers,india
+Birlasoft,Custom,https://www.birlasoft.com/careers,india
+Hexaware,Custom,https://hexaware.com/careers/,india
+Zensar,Custom,https://www.zensar.com/careers,india
+Cyient,Custom,https://www.cyient.com/careers,india
+LTTS,Custom,https://www.ltts.com/careers,india
+Happiest Minds,Custom,https://www.happiestminds.com/careers/,india
+Sonata Software,Custom,https://www.sonata-software.com/careers,india
+Mindtree,Custom,https://www.mindtree.com/careers,india
+NIIT Technologies,Custom,https://www.niit-tech.com/careers,india
+Mastech Digital,Custom,https://www.mastechdigital.com/careers,india
+Sasken,Custom,https://www.sasken.com/careers,india
+KPIT Technologies,Custom,https://www.kpit.com/careers/,india
+Tata Elxsi,Custom,https://www.tataelxsi.com/careers,india
+Ness Digital,Custom,https://www.ness.com/careers,india
+GlobalLogic,Custom,https://www.globallogic.com/careers/,india
+Nagarro,Custom,https://www.nagarro.com/careers,india
+Thoughtworks,Greenhouse,https://www.thoughtworks.com/careers,india
+Publicis Sapient,Custom,https://www.publicissapient.com/careers,india
+Valtech,Custom,https://www.valtech.com/careers/,india
+EPAM,Greenhouse,https://www.epam.com/careers,india
+Grid Dynamics,Greenhouse,https://www.griddynamics.com/careers,india
+Genpact,Custom,https://www.genpact.com/careers,india
+EXL,Custom,https://www.exlservice.com/careers,india
+Sutherland,Custom,https://www.sutherlandglobal.com/careers,india
+WNS,Custom,https://www.wns.com/careers,india
+Concentrix,Custom,https://www.concentrix.com/careers/,india
+Teleperformance,Custom,https://www.teleperformance.com/careers,india
+Firstsource,Custom,https://www.firstsource.com/careers,india
+CSS Corp,Custom,https://www.csscorp.com/careers,india
+IBM,Workday,https://www.ibm.com/employment/in-en/,india
+Oracle,Custom,https://www.oracle.com/in/corporate/careers/,india
+SAP Labs,SuccessFactors,https://jobs.sap.com/search/?q=&locationsearch=india,india
+Salesforce,Greenhouse,https://www.salesforce.com/in/company/careers/,india
+Adobe,Workday,https://careers.adobe.com/,india
+Atlassian,Greenhouse,https://www.atlassian.com/company/careers,india
+Cisco,Workday,https://jobs.cisco.com/,india
+VMware,Workday,https://careers.vmware.com,india
+Dell,Workday,https://jobs.dell.com/india,india
+HP,Workday,https://jobs.hp.com/,india
+Intel,Workday,https://jobs.intel.com/,india
+Qualcomm,Workday,https://careers.qualcomm.com/,india
+NVIDIA,Workday,https://nvidia.wd5.myworkdayjobs.com/NVIDIAExternalCareerSite,india
+AMD,Workday,https://careers.amd.com/,india
+Samsung,Custom,https://www.samsung.com/in/aboutsamsung/careers/,india
+Sony,Custom,https://www.sony.co.in/careers,india
+LG,Custom,https://www.lg.com/in/support/careers,india
+Panasonic,Custom,https://www.panasonic.com/in/corporate/careers.html,india
+Philips,Workday,https://www.careers.philips.com/,india
+Siemens,Workday,https://jobs.siemens.com/,india
+Bosch,Custom,https://www.bosch.in/careers/,india
+Honeywell,Workday,https://careers.honeywell.com/,india
+GE,Workday,https://jobs.gecareers.com/,india
+Schneider Electric,Workday,https://www.se.com/in/en/about-us/careers/,india
+ABB,Workday,https://new.abb.com/careers,india
+Emerson,Workday,https://www.emerson.com/en-in/careers,india
+Rockwell,Workday,https://www.rockwellautomation.com/careers,india
+Texas Instruments,Workday,https://careers.ti.com/,india
+NXP,Workday,https://www.nxp.com/company/about-nxp/careers,india
+Infineon,Workday,https://www.infineon.com/careers,india
+STMicroelectronics,Workday,https://www.st.com/content/st_com/en/about/careers.html,india
+Micron,Workday,https://micron.wd1.myworkdayjobs.com/External,india
+Western Digital,Workday,https://jobs.westerndigital.com/,india
+Seagate,Workday,https://www.seagate.com/in/en/jobs/,india
+NetApp,Workday,https://www.netapp.com/company/careers/,india
+Pure Storage,Greenhouse,https://www.purestorage.com/company/careers.html,india
+Nutanix,Greenhouse,https://www.nutanix.com/careers,india
+Games24x7,Lever,https://www.games24x7.com/careers/,india
+Mobile Premier League,Lever,https://www.mpl.live/careers,india
+Nazara Technologies,Lever,https://www.nazara.com/careers/,india
+JetSynthesys,Lever,https://www.jetsynthesys.com/careers/,india
+Gameskraft,Lever,https://gameskraft.com/careers/,india
+Loco,Lever,https://loco.gg/careers,india
+Rooter,Lever,https://rooter.gg/careers,india
+Paytm First Games,Lever,https://firstgames.in/careers,india
+Junglee Games,Lever,https://www.jungleegames.com/careers,india
+Adda52,Custom,https://www.adda52.com/careers,india
+Rummy Circle,Custom,https://www.rummycircle.com/careers,india
+PokerBaazi,Custom,https://www.pokerbaazi.com/careers,india
+A23,Custom,https://www.a23.com/careers,india
+Zupee,Lever,https://www.zupee.com/careers,india
+WinZO,Lever,https://www.winzogames.com/careers,india
+Pocket52,Lever,https://pocket52.com/careers,india
+GetMega,Lever,https://www.getmega.com/careers,india
+Rush,Lever,https://www.getrushapp.com/careers,india
+Rario,Lever,https://rario.com/careers,india
+FanCode,Lever,https://fancode.com/careers,india
+Times Internet,Custom,https://timesinternet.in/careers/,india
+Zee5,Custom,https://www.zee5.com/careers,india
+Sony LIV,Custom,https://www.sonyliv.com/careers,india
+Viacom18,Custom,https://www.viacom18.com/careers,india
+Voot,Custom,https://www.voot.com/careers,india
+ALTBalaji,Custom,https://www.altbalaji.com/careers,india
+Eros Now,Custom,https://erosnow.com/careers,india
+MX Player,Custom,https://www.mxplayer.in/careers,india
+Pocket FM,Lever,https://pocketfm.com/careers,india
+Kuku FM,Lever,https://kukufm.com/careers,india
+Headfone,Lever,https://headfone.in/careers,india
+HDFC Bank,Custom,https://www.hdfcbank.com/personal/about-us/careers,india
+ICICI Bank,Custom,https://www.icicicareers.com/,india
+Axis Bank,Custom,https://www.axisbank.com/about-us/careers,india
+Kotak Mahindra Bank,Custom,https://www.kotak.com/en/careers.html,india
+State Bank of India,Custom,https://www.sbi.co.in/web/careers,india
+Bank of Baroda,Custom,https://www.bankofbaroda.in/careers,india
+Punjab National Bank,Custom,https://www.pnbindia.in/careers.html,india
+Canara Bank,Custom,https://canarabank.com/careers,india
+Union Bank,Custom,https://www.unionbankofindia.co.in/careers.aspx,india
+Bank of India,Custom,https://bankofindia.co.in/career,india
+Indian Bank,Custom,https://www.indianbank.in/careers/,india
+Central Bank,Custom,https://www.centralbankofindia.co.in/en/careers,india
+IDBI Bank,Custom,https://www.idbibank.in/careers.asp,india
+Yes Bank,Custom,https://www.yesbank.in/about-us/careers,india
+IndusInd Bank,Custom,https://www.indusind.com/in/en/careers.html,india
+Federal Bank,Custom,https://www.federalbank.co.in/careers,india
+RBL Bank,Custom,https://www.rblbank.com/about-us/careers,india
+South Indian Bank,Custom,https://www.southindianbank.com/careers,india
+Karur Vysya Bank,Custom,https://www.kvb.co.in/careers/,india
+City Union Bank,Custom,https://www.cityunionbank.com/careers,india
+DCB Bank,Custom,https://www.dcbbank.com/careers,india
+Bandhan Bank,Custom,https://www.bandhanbank.com/careers,india
+IDFC First Bank,Custom,https://www.idfcfirstbank.com/careers,india
+AU Small Finance Bank,Custom,https://www.aubank.in/careers,india
+Equitas Small Finance Bank,Custom,https://www.equitasbank.com/careers,india
+Ujjivan Small Finance Bank,Custom,https://www.ujjivansfb.in/careers,india
+Jana Small Finance Bank,Custom,https://www.janabank.com/careers,india
+Suryoday Small Finance Bank,Custom,https://suryodaybank.com/careers,india
+ESAF Small Finance Bank,Custom,https://www.esafbank.com/careers,india
+Fincare Small Finance Bank,Custom,https://www.fincarebank.com/careers,india
+Bajaj Finserv,Custom,https://www.bajajfinserv.in/careers,india
+Aditya Birla Capital,Custom,https://www.adityabirlacapital.com/careers,india
+Mahindra Finance,Custom,https://www.mahindrafinance.com/careers,india
+Shriram Finance,Custom,https://www.shriramfinance.in/careers,india
+Muthoot Finance,Custom,https://www.muthootfinance.com/careers,india
+Manappuram Finance,Custom,https://www.manappuram.com/careers,india
+L&T Finance,Custom,https://www.ltfs.com/careers.html,india
+Piramal Finance,Custom,https://www.piramalfinance.com/careers,india
+IIFL Finance,Custom,https://www.iifl.com/careers,india
+Tata Capital,Custom,https://www.tatacapital.com/careers.html,india
+Cholamandalam,Custom,https://www.cholamandalam.com/careers.aspx,india
+Sundaram Finance,Custom,https://www.sundaramfinance.in/careers,india
+Airtel,Workday,https://www.airtel.in/careers/,india
+Vodafone Idea,Workday,https://www.myvi.in/careers,india
+BSNL,Custom,https://www.bsnl.co.in/opencms/bsnl/BSNL/about_us/career/,india
+MTNL,Custom,https://mtnl.in/careers,india
+Tata Communications,Workday,https://www.tatacommunications.com/careers/,india
+Reliance Jio,Custom,https://careers.jio.com/,india
+Bharti Infratel,Workday,https://www.industowers.com/careers/,india
+American Tower India,Custom,https://www.americantower.com/careers/,india
+Sterlite Technologies,Custom,https://www.stl.tech/careers/,india
+Tejas Networks,Custom,https://www.tejasnetworks.com/careers,india
+HFCL,Custom,https://www.hfcl.com/careers/,india
+Dixon Technologies,Custom,https://www.dixontechnologies.com/careers,india
+Lava International,Custom,https://www.lavamobiles.com/careers,india
+Micromax,Custom,https://www.micromaxinfo.com/careers,india
+Tata Motors,Custom,https://www.tatamotors.com/careers/,india
+Mahindra & Mahindra,Custom,https://www.mahindra.com/careers,india
+Maruti Suzuki,Custom,https://www.marutisuzuki.com/corporate/careers,india
+Bajaj Auto,Custom,https://www.bajajauto.com/careers,india
+Hero MotoCorp,Custom,https://www.heromotocorp.com/en-in/careers.html,india
+TVS Motor,Custom,https://www.tvsmotor.com/careers,india
+Royal Enfield,Custom,https://www.royalenfield.com/in/en/careers/,india
+Ashok Leyland,Custom,https://www.ashokleyland.com/careers,india
+Eicher Motors,Custom,https://www.eicher.in/careers,india
+Force Motors,Custom,https://www.forcemotors.com/careers,india
+Escorts,Custom,https://www.escorts.co.in/careers/,india
+Tafe,Custom,https://www.tafe.com/careers,india
+Swaraj,Custom,https://www.swaraj.com/careers,india
+Sonalika,Custom,https://www.sonalika.com/careers,india
+Greaves Cotton,Custom,https://www.greavescotton.com/careers,india
+Cummins India,Custom,https://www.cumminsindia.com/careers,india
+Kirloskar,Custom,https://www.kirloskar.com/careers,india
+Thermax,Custom,https://www.thermaxglobal.com/careers/,india
+L&T,Custom,https://www.larsentoubro.com/corporate/careers/,india
+Godrej,Custom,https://www.godrej.com/careers,india
+Tata Steel,Custom,https://www.tatasteel.com/careers/,india
+JSW Steel,Custom,https://www.jsw.in/careers,india
+Hindalco,Custom,https://www.hindalco.com/careers,india
+Vedanta,Custom,https://www.vedantalimited.com/careers,india
+SAIL,Custom,https://www.sail.co.in/careers,india
+NMDC,Custom,https://www.nmdc.co.in/careers,india
+Coal India,Custom,https://www.coalindia.in/careers,india
+ONGC,Custom,https://www.ongcindia.com/careers,india
+Indian Oil,Custom,https://www.iocl.com/pages/careers,india
+Bharat Petroleum,Custom,https://www.bharatpetroleum.in/careers.aspx,india
+Hindustan Petroleum,Custom,https://www.hindustanpetroleum.com/careers,india
+Reliance Industries,Custom,https://careers.ril.com/,india
+Adani Group,Custom,https://www.adani.com/careers,india
+McKinsey,Custom,https://www.mckinsey.com/careers/search-jobs?locations=India,india
+BCG,Custom,https://careers.bcg.com/locations/india,india
+Bain & Company,Custom,https://www.bain.com/careers/find-a-role/,india
+Deloitte,Custom,https://www2.deloitte.com/in/en/careers.html,india
+EY,Custom,https://www.ey.com/en_in/careers,india
+KPMG,Custom,https://home.kpmg/in/en/home/careers.html,india
+PwC,Custom,https://www.pwc.in/careers.html,india
+ZS Associates,Custom,https://www.zs.com/careers/search-jobs,india
+Kearney,Custom,https://www.kearney.com/careers,india
+Oliver Wyman,Custom,https://www.oliverwyman.com/careers.html,india
+Roland Berger,Custom,https://www.rolandberger.com/en/Join/,india
+Strategy&,Custom,https://www.strategyand.pwc.com/gx/en/careers.html,india
+L.E.K. Consulting,Custom,https://www.lek.com/join-lek,india
+Simon-Kucher,Custom,https://www.simon-kucher.com/en/careers,india
+Alvarez & Marsal,Custom,https://www.alvarezandmarsal.com/careers,india
+FTI Consulting,Custom,https://www.fticonsulting.com/careers,india
+Protiviti,Custom,https://www.protiviti.com/in-en/careers,india
+Willis Towers Watson,Custom,https://careers.wtwco.com/,india
+Mercer,Custom,https://www.mercer.com/careers.html,india
+Aon,Custom,https://jobs.aon.com/,india
+Marsh McLennan,Custom,https://careers.marshmclennan.com/,india
+Grant Thornton,Custom,https://www.grantthornton.in/careers/,india
+BDO,Custom,https://www.bdo.in/en-gb/careers,india
+RSM,Custom,https://www.rsm.global/india/careers,india
+Baker Tilly,Custom,https://www.bakertilly.in/careers,india
+Mazars,Custom,https://www.mazars.in/Home/Join-us,india
+Crowe,Custom,https://www.crowe.com/in/careers,india
